@@ -81,10 +81,16 @@ export interface CoinDetails {
   };
   market_data: {
     current_price: { [key: string]: number };
+    high_24h: { [key: string]: number };
+    low_24h: { [key: string]: number };
     total_supply: number;
     max_supply: number;
     circulating_supply: number;
     total_volume: { [key: string]: number };
     market_cap: { [key: string]: number };
+    price_change_percentage_24h: number;
+    price_change_percentage_7d: number;
+    price_change_percentage_30d: number;
+    price_change_percentage_1y: number;
   }
 }

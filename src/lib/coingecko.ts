@@ -3,9 +3,10 @@ import type { Coin, CoinDetails, MarketChart } from '@/lib/types';
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 
-async function fetchAPI<T>(endpoint: string): Promise<T> {
+async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
       next: { revalidate: 60 } // Revalidate every 60 seconds
     });
     if (!response.ok) {
@@ -23,7 +24,7 @@ async function fetchAPI<T>(endpoint: string): Promise<T> {
 
 export async function getTopCoins(page: number = 1): Promise<Coin[]> {
   try {
-    const data = await fetchAPI<Coin[]>(`/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=${page}&sparkline=true&price_change_percentage=24h`);
+    const data = await fetchAPI<Coin[]>(`/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=${page}&sparkline=true&price_change_percentage=24h`, { cache: 'no-store' });
     return data;
   } catch (error) {
     return []; // Return empty array on error to prevent crashing the page
@@ -45,11 +46,11 @@ export async function getCoinDetails(coinId: string): Promise<CoinDetails> {
     image: data.image?.large || '',
     links: {
       ...data.links,
-      homepage: data.links.homepage.filter((l:string) => l),
-      blockchain_site: data.links.blockchain_site.filter((l:string) => l),
-      official_forum_url: data.links.official_forum_url.filter((l:string) => l),
-      chat_url: data.links.chat_url.filter((l:string) => l),
-      announcement_url: data.links.announcement_url.filter((l:string) => l),
+      homepage: data.links.homepage?.filter((l:string) => l) || [],
+      blockchain_site: data.links.blockchain_site?.filter((l:string) => l) || [],
+      official_forum_url: data.links.official_forum_url?.filter((l:string) => l) || [],
+      chat_url: data.links.chat_url?.filter((l:string) => l) || [],
+      announcement_url: data.links.announcement_url?.filter((l:string) => l) || [],
     }
   }
 }
