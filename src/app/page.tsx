@@ -7,7 +7,7 @@ import type { Coin } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { CryptoTable } from '@/components/crypto-table';
 import { RecommendationModal } from '@/components/recommendation-modal';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Gamepad2 } from 'lucide-react';
 import { getTopCoins } from '@/lib/coingecko';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSearchParams } from 'next/navigation';
@@ -74,6 +74,9 @@ function LandingPage() {
               </Button>
               <Button size="lg" variant="outline" className="rounded-full" asChild>
                 <Link href="#top-coins">Learn More</Link>
+              </Button>
+              <Button size="lg" variant="secondary" className="rounded-full" asChild>
+                <Link href="/games"><Gamepad2 className="mr-2 h-5 w-5" />Play Arcade</Link>
               </Button>
             </div>
           </div>
