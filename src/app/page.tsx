@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import type { Coin } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -10,21 +10,33 @@ import { RecommendationModal } from '@/components/recommendation-modal';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTopCoins } from '@/lib/coingecko';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSearchParams } from 'next/navigation';
 
-interface LandingPageProps {
-  initialCoins: Coin[];
-  currentPage: number;
-}
+function LandingPage() {
+  const searchParams = useSearchParams();
+  const page = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
 
-function LandingPage({ initialCoins, currentPage }: LandingPageProps) {
-  const [coins, setCoins] = useState<Coin[]>(initialCoins);
+  const [coins, setCoins] = useState<Coin[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(page);
 
   useEffect(() => {
-    setCoins(initialCoins);
-  }, [initialCoins]);
-
+    const pageNum = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
+    setCurrentPage(pageNum);
+    setLoading(true);
+    
+    getTopCoins(pageNum)
+      .then(initialCoins => {
+        setCoins(initialCoins);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch initial coins", err);
+        setLoading(false);
+      });
+  }, [searchParams]);
+  
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -38,9 +50,6 @@ function LandingPage({ initialCoins, currentPage }: LandingPageProps) {
     return () => clearInterval(interval);
   }, [currentPage]);
 
-  const handlePageChange = () => {
-    setLoading(true);
-  };
 
   const hasNextPage = coins.length === 50;
 
@@ -79,14 +88,14 @@ function LandingPage({ initialCoins, currentPage }: LandingPageProps) {
             )}
             <div className="flex justify-center items-center gap-4 mt-8">
               <Button asChild variant="outline" disabled={currentPage <= 1}>
-                <Link href={`/?page=${currentPage - 1}`} onClick={handlePageChange}>
+                <Link href={`/?page=${currentPage - 1}`}>
                   <ChevronLeft className="mr-2 h-4 w-4" />
                   Previous
                 </Link>
               </Button>
               <span className="text-muted-foreground">Page {currentPage}</span>
               <Button asChild variant="outline" disabled={!hasNextPage}>
-                <Link href={`/?page=${currentPage + 1}`} onClick={handlePageChange}>
+                <Link href={`/?page=${currentPage + 1}`}>
                   Next
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -108,29 +117,8 @@ function LandingPage({ initialCoins, currentPage }: LandingPageProps) {
 
 
 export default function HomeWrapper() {
-  const [coins, setCoins] = useState<Coin[]>([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const pageNum = params.get('page') ? Number(params.get('page')) : 1;
-    setPage(pageNum);
-    
-    setLoading(true);
-    getTopCoins(pageNum)
-      .then(initialCoins => {
-        setCoins(initialCoins);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch initial coins", err);
-        setLoading(false);
-      });
-  }, []);
-  
-  if (loading) {
-    return (
+  return (
+    <Suspense fallback={
       <div className="container py-12">
         <div className="space-y-2">
           {[...Array(10)].map((_, i) => (
@@ -138,8 +126,8 @@ export default function HomeWrapper() {
           ))}
         </div>
       </div>
-    );
-  }
-
-  return <LandingPage initialCoins={coins} currentPage={page} />;
+    }>
+      <LandingPage />
+    </Suspense>
+  );
 }
