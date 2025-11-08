@@ -1,5 +1,5 @@
 
-import type { Coin, CoinDetails, MarketChart } from '@/lib/types';
+import type { Coin, CoinDetails, Exchange, MarketChart } from '@/lib/types';
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 
@@ -74,6 +74,14 @@ export async function getTrendingCoins(): Promise<TrendingCoin[]> {
   try {
     const data = await fetchAPI<{ coins: TrendingCoin[] }>('/search/trending');
     return data.coins;
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function getExchanges(): Promise<Exchange[]> {
+  try {
+    return await fetchAPI<Exchange[]>('/exchanges');
   } catch (error) {
     return [];
   }
