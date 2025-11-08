@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, Clock, BarChart, Reddit } from 'lucide-react';
+import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, Clock, BarChart } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -20,11 +20,6 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
       minimumFractionDigits: 2,
       maximumFractionDigits: 6,
     }).format(amount);
-  }
-
-  const formatPercentage = (percentage?: number) => {
-    if (typeof percentage !== 'number') return 'N/A';
-    return `${percentage.toFixed(2)}%`;
   }
   
   const Percentage = ({ value }: { value?: number }) => {
@@ -50,6 +45,24 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
       </Button>
     )
   }
+
+  const RedditIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+      <path d="M16.5 10c-.99 0-1.8.4-2.4 1-.6-.6-1.41-1-2.4-1-.99 0-1.8.4-2.4 1-.6-.6-1.41-1-2.4-1-1.4 0-2.5 1.1-2.5 2.5 0 1.15.75 2.1 1.75 2.4L6.5 18H8v-2.5c0-.28.22-.5.5-.5h7c.28 0 .5.22.5.5V18h1.5l.75-3.1c1-.3 1.75-1.25 1.75-2.4 0-1.4-1.1-2.5-2.5-2.5z" />
+      <circle cx="8.5" cy="10.5" r=".5" fill="currentColor" />
+      <circle cx="15.5" cy="10.5" r=".5" fill="currentColor" />
+    </svg>
+  );
 
   return (
     <div className="container py-12">
@@ -157,7 +170,7 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
             <CardContent className="space-y-3">
               <SocialLink href={coin.links.homepage[0]} icon={<Globe />} label="Website" />
               <SocialLink href={coin.links.blockchain_site[0]} icon={<ExternalLink />} label="Explorer" />
-              <SocialLink href={coin.links.subreddit_url} icon={<Reddit />} label="Reddit" />
+              <SocialLink href={coin.links.subreddit_url} icon={<RedditIcon className="h-4 w-4" />} label="Reddit" />
               <SocialLink href={coin.links.twitter_screen_name ? `https://twitter.com/${coin.links.twitter_screen_name}` : undefined} icon={<Twitter />} label="Twitter" />
               <SocialLink href={coin.links.chat_url.filter(c => c)[0]} icon={<MessageCircle />} label="Chat" />
               <SocialLink href={coin.links.repos_url.github[0]} icon={<Github />} label="Github" />
