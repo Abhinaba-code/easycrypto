@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gamepad2, Coins, Loader2, RefreshCw, Wallet, PiggyBank, Car } from 'lucide-react';
+import { Gamepad2, Coins, Loader2, RefreshCw, Wallet, PiggyBank, Car, Users, Bot, CircleDot, Asterisk, CandlestickChart, Rocket, Hand, Diamond, Clapperboard, Puzzle, Swords, Dice5, Target } from 'lucide-react';
 import { getCoinDetails } from '@/lib/coingecko';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
@@ -24,8 +24,8 @@ const SnakeIcon = (props: React.SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <path d="M11.5 8.5c0-1.1.9-2 2-2s2 .9 2 2" />
-    <path d="M11.5 15.5c0 1.1.9 2 2 2s2-.9 2-2" />
-    <path d="M5.5 15.5c0 1.1.9 2 2 2s2-.9 2-2" />
+    <path d="M11.5 15.5c0 1.1.9 2 2-2s2-.9 2-2" />
+    <path d="M5.5 15.5c0 1.1.9 2 2-2s2-.9 2-2" />
     <path d="M12 2v2" />
     <path d="M12 10v4" />
     <path d="M12 20v2" />
@@ -100,6 +100,18 @@ export default function ArcadePage() {
 
   const result = getResultContent();
 
+  const ComingSoonCard = ({ title, icon }: { title: string, icon: React.ReactNode }) => (
+    <Card className="border-dashed flex flex-col justify-center items-center text-center">
+      <CardHeader>
+        <div className="flex justify-center mb-2">{icon}</div>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground">A new crypto game. Coming soon!</p>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="container py-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -117,7 +129,7 @@ export default function ArcadePage() {
           </CardHeader>
         </Card>
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -164,35 +176,25 @@ export default function ArcadePage() {
           </CardContent>
         </Card>
         
-        <Card className="border-dashed flex flex-col justify-center items-center text-center">
-          <CardHeader>
-             <div className="flex justify-center mb-2"><PiggyBank className="h-8 w-8 text-muted-foreground" /></div>
-            <CardTitle>Crypto Ludo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">A classic game with a crypto twist. Coming soon!</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-dashed flex flex-col justify-center items-center text-center">
-          <CardHeader>
-             <div className="flex justify-center mb-2"><SnakeIcon className="h-8 w-8 text-muted-foreground" /></div>
-            <CardTitle>Ether Snake</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Navigate the snake to eat the coins. Coming soon!</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-dashed flex flex-col justify-center items-center text-center">
-          <CardHeader>
-             <div className="flex justify-center mb-2"><Car className="h-8 w-8 text-muted-foreground" /></div>
-            <CardTitle>Crypto Racers</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Race to the finish line in this crypto-themed racing game. Coming soon!</p>
-          </CardContent>
-        </Card>
+        <ComingSoonCard title="Crypto Ludo" icon={<PiggyBank className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Ether Snake" icon={<SnakeIcon className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Crypto Racers" icon={<Car className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Bitcoin Poker" icon={<Users className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="AI Blackjack" icon={<Bot className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Doge Roulette" icon={<CircleDot className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Shiba Slots" icon={<Asterisk className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Futures Trading Sim" icon={<CandlestickChart className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="To The Moon Rocket" icon={<Rocket className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Crypto Hold'em" icon={<Hand className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Diamond Hands" icon={<Diamond className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="NFT Bingo" icon={<Clapperboard className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="DeFi Puzzle" icon={<Puzzle className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Chainlink Champions" icon={<Swords className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Ripple Dice" icon={<Dice5 className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Coin Toss" icon={<Coins className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Bullseye Bets" icon={<Target className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Token Tussle" icon={<Users className="h-8 w-8 text-muted-foreground" />} />
+        <ComingSoonCard title="Gas Fee Gamble" icon={<Zap className="h-8 w-8 text-muted-foreground" />} />
 
       </div>
     </div>
