@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { Menu, Rocket } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Logo } from '@/components/logo';
+import { cn } from '@/lib/utils';
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -15,11 +17,16 @@ const navLinks = [
 
 export function Header() {
   const isMobile = useIsMobile();
+  const pathname = usePathname();
 
   const navContent = (
     <>
       {navLinks.map((link) => (
-        <Button key={link.href} variant="ghost" asChild>
+        <Button
+          key={link.href}
+          variant={pathname === link.href ? 'secondary' : 'ghost'}
+          asChild
+        >
           <Link href={link.href}>{link.label}</Link>
         </Button>
       ))}
