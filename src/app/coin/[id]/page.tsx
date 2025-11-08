@@ -1,5 +1,6 @@
 
-import { getCoinDetails, getMarketChart } from '@/lib/coingecko';
+import { getCoinDetails } from '@/lib/coingecko';
+import { getMarketChart } from '@/lib/coincap';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

@@ -1,5 +1,5 @@
 
-import type { Coin, CoinCapAsset } from '@/lib/types';
+import type { Coin, CoinCapAsset, MarketChart } from '@/lib/types';
 
 const API_BASE_URL = 'https://api.coincap.io/v2';
 
@@ -75,9 +75,16 @@ interface MarketHistory {
     time: number;
 }
 
-export async function getMarketChart(coinId: string, days: number = 7): Promise<{ prices: [number, number][], market_caps: [], total_volumes: [] }> {
+function getIntervalForDays(days: number): string {
+    if (days <= 2) return 'm30';   // 30 minute interval for up to 2 days
+    if (days <= 30) return 'h2';   // 2 hour interval for up to 30 days
+    if (days <= 90) return 'h12';  // 12 hour interval for up to 90 days
+    return 'd1';                   // 1 day interval for over 90 days
+}
+
+export async function getMarketChart(coinId: string, days: number = 7): Promise<MarketChart> {
   try {
-    const interval = 'h1'; // Use 1-hour interval for 7 days
+    const interval = getIntervalForDays(days);
     const end = Date.now();
     const start = end - (days * 24 * 60 * 60 * 1000);
 
@@ -85,10 +92,11 @@ export async function getMarketChart(coinId: string, days: number = 7): Promise<
     
     const prices = data.map(item => [item.time, parseFloat(item.priceUsd)]);
     
+    // CoinCap doesn't provide market cap or volume history in this endpoint.
+    // We will return empty arrays to match the expected data structure.
     return { prices, market_caps: [], total_volumes: [] };
   } catch (error) {
-    console.error(`Failed to get market chart for ${coinId}`, error);
+    console.error(`Failed to get market chart for ${coinId} from CoinCap`, error);
     return { prices: [], market_caps: [], total_volumes: [] };
   }
 }
-

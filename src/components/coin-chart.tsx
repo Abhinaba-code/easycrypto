@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { getMarketChart } from '@/lib/coingecko';
+import { getMarketChart } from '@/lib/coincap';
 import type { MarketChart as MarketChartType } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -45,7 +45,7 @@ export function CoinChart({ coinId, initialData }: CoinChartProps) {
   })}`;
   
   const formatDate = (value: number) => {
-    if (days === 1) {
+    if (days <= 2) {
       return format(new Date(value), 'p');
     }
     return format(new Date(value), 'MMM d, yyyy');
@@ -53,7 +53,6 @@ export function CoinChart({ coinId, initialData }: CoinChartProps) {
 
   const ChartTooltipContent = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-      const dataPoint = payload[0].payload;
       return (
         <div className="bg-background border border-border p-2 rounded-lg shadow-lg text-sm">
           <p className="font-bold">{formatDate(label)}</p>
@@ -68,33 +67,38 @@ export function CoinChart({ coinId, initialData }: CoinChartProps) {
     return null;
   };
 
-  const Chart = ({ dataKey, name, color }: { dataKey: 'prices' | 'market_caps' | 'total_volumes', name: string, color: string }) => (
-    <ResponsiveContainer width="100%" height={300}>
-      <AreaChart data={data[dataKey]} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-        <defs>
-          <linearGradient id={`color${name}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={color} stopOpacity={0.8} />
-            <stop offset="95%" stopColor={color} stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <XAxis 
-          dataKey="0" 
-          tickFormatter={formatDate}
-          minTickGap={80}
-          tick={{ fontSize: 12 }}
-          stroke="hsl(var(--muted-foreground))"
-        />
-        <YAxis 
-          tickFormatter={formatCurrency}
-          orientation="right"
-          tick={{ fontSize: 12 }}
-          stroke="hsl(var(--muted-foreground))"
-        />
-        <Tooltip content={<ChartTooltipContent />} />
-        <Area type="monotone" dataKey="1" name={name} stroke={color} fill={`url(#color${name})`} />
-      </AreaChart>
-    </ResponsiveContainer>
-  );
+  const Chart = ({ dataKey, name, color }: { dataKey: 'prices' | 'market_caps' | 'total_volumes', name: string, color: string }) => {
+    if (!data[dataKey] || data[dataKey].length === 0) {
+      return <div className="text-center text-muted-foreground py-10">No data available for this period.</div>;
+    }
+    return (
+      <ResponsiveContainer width="100%" height={300}>
+        <AreaChart data={data[dataKey]} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+          <defs>
+            <linearGradient id={`color${name}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={color} stopOpacity={0.8} />
+              <stop offset="95%" stopColor={color} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <XAxis 
+            dataKey="0" 
+            tickFormatter={formatDate}
+            minTickGap={80}
+            tick={{ fontSize: 12 }}
+            stroke="hsl(var(--muted-foreground))"
+          />
+          <YAxis 
+            tickFormatter={formatCurrency}
+            orientation="right"
+            tick={{ fontSize: 12 }}
+            stroke="hsl(var(--muted-foreground))"
+          />
+          <Tooltip content={<ChartTooltipContent />} />
+          <Area type="monotone" dataKey="1" name={name} stroke={color} fill={`url(#color${name})`} />
+        </AreaChart>
+      </ResponsiveContainer>
+    );
+  };
 
   return (
     <div>
@@ -115,19 +119,11 @@ export function CoinChart({ coinId, initialData }: CoinChartProps) {
         <Skeleton className="h-[300px] w-full" />
       ) : (
         <Tabs defaultValue="price">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="price">Price</TabsTrigger>
-            <TabsTrigger value="market_cap">Market Cap</TabsTrigger>
-            <TabsTrigger value="volume">Volume</TabsTrigger>
           </TabsList>
           <TabsContent value="price">
             <Chart dataKey="prices" name="Price" color="hsl(var(--primary))" />
-          </TabsContent>
-          <TabsContent value="market_cap">
-             <Chart dataKey="market_caps" name="Market Cap" color="hsl(var(--accent))" />
-          </TabsContent>
-          <TabsContent value="volume">
-             <Chart dataKey="total_volumes" name="Volume" color="hsl(var(--secondary-foreground))" />
           </TabsContent>
         </Tabs>
       )}
