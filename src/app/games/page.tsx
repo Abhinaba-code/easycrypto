@@ -3,12 +3,39 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gamepad2, Coins, Loader2, RefreshCw } from 'lucide-react';
+import { Gamepad2, Coins, Loader2, RefreshCw, Wallet, PiggyBank, Car } from 'lucide-react';
 import { getCoinDetails } from '@/lib/coingecko';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 
 type GameState = 'playing' | 'loading' | 'won' | 'lost';
+
+const SnakeIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M11.5 8.5c0-1.1.9-2 2-2s2 .9 2 2" />
+    <path d="M11.5 15.5c0 1.1.9 2 2 2s2-.9 2-2" />
+    <path d="M5.5 15.5c0 1.1.9 2 2 2s2-.9 2-2" />
+    <path d="M12 2v2" />
+    <path d="M12 10v4" />
+    <path d="M12 20v2" />
+    <path d="M20 12h2" />
+    <path d="M18 12h-4" />
+    <path d="M6 12H2" />
+    <path d="M10 12H8" />
+  </svg>
+);
+
 
 export default function ArcadePage() {
   const [gameState, setGameState] = useState<GameState>('playing');
@@ -63,10 +90,10 @@ export default function ArcadePage() {
 
   const getResultContent = () => {
     if (gameState === 'won') {
-      return { title: "You Won!", variant: 'default', description: `The price went from $${initialPrice?.toLocaleString()} to $${finalPrice?.toLocaleString()}.` };
+      return { title: "You Won!", variant: 'default' as const, description: `The price went from $${initialPrice?.toLocaleString()} to $${finalPrice?.toLocaleString()}.` };
     }
     if (gameState === 'lost') {
-      return { title: "You Lost!", variant: 'destructive', description: `The price went from $${initialPrice?.toLocaleString()} to $${finalPrice?.toLocaleString()}.` };
+      return { title: "You Lost!", variant: 'destructive' as const, description: `The price went from $${initialPrice?.toLocaleString()} to $${finalPrice?.toLocaleString()}.` };
     }
     return null;
   };
@@ -75,9 +102,20 @@ export default function ArcadePage() {
 
   return (
     <div className="container py-12">
-      <div className="flex items-center gap-4 mb-8">
-        <Gamepad2 className="h-8 w-8" />
-        <h1 className="text-3xl font-headline font-bold">Crypto Arcade</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="flex items-center gap-4">
+          <Gamepad2 className="h-8 w-8" />
+          <h1 className="text-3xl font-headline font-bold">Crypto Arcade</h1>
+        </div>
+        <Card className="w-full sm:w-auto">
+          <CardHeader className="flex flex-row items-center gap-4 p-4">
+            <Wallet className="h-6 w-6 text-primary" />
+            <div>
+              <CardTitle className="text-sm font-medium leading-none">Virtual Wallet</CardTitle>
+              <p className="text-2xl font-bold">$1,000</p>
+            </div>
+          </CardHeader>
+        </Card>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         <Card>
@@ -125,14 +163,37 @@ export default function ArcadePage() {
 
           </CardContent>
         </Card>
-        <Card className="border-dashed">
+        
+        <Card className="border-dashed flex flex-col justify-center items-center text-center">
           <CardHeader>
-            <CardTitle>More Games Coming Soon!</CardTitle>
+             <div className="flex justify-center mb-2"><PiggyBank className="h-8 w-8 text-muted-foreground" /></div>
+            <CardTitle>Crypto Ludo</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">We're building more fun, crypto-themed games for you to enjoy.</p>
+            <p className="text-muted-foreground">A classic game with a crypto twist. Coming soon!</p>
           </CardContent>
         </Card>
+        
+        <Card className="border-dashed flex flex-col justify-center items-center text-center">
+          <CardHeader>
+             <div className="flex justify-center mb-2"><SnakeIcon className="h-8 w-8 text-muted-foreground" /></div>
+            <CardTitle>Ether Snake</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">Navigate the snake to eat the coins. Coming soon!</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-dashed flex flex-col justify-center items-center text-center">
+          <CardHeader>
+             <div className="flex justify-center mb-2"><Car className="h-8 w-8 text-muted-foreground" /></div>
+            <CardTitle>Crypto Racers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">Race to the finish line in this crypto-themed racing game. Coming soon!</p>
+          </CardContent>
+        </Card>
+
       </div>
     </div>
   );
