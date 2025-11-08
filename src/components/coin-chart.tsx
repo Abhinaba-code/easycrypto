@@ -2,10 +2,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LineChart, Line } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { getMarketChart } from '@/lib/coingecko';
 import type { MarketChart as MarketChartType } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from './ui/skeleton';
@@ -25,22 +24,32 @@ const timeRanges = [
 
 export function CoinChart({ coinId, initialData }: CoinChartProps) {
   const [data, setData] = useState(initialData);
-  const [days, setDays] = useState<number | string>(7);
+  const [days, setDays] = useState<number>(7);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (days === 7 && initialData) {
+      setData(initialData);
+      return;
+    }
+    
     setLoading(true);
     getMarketChart(coinId, days)
       .then(setData)
       .finally(() => setLoading(false));
-  }, [coinId, days]);
+  }, [coinId, days, initialData]);
 
   const formatCurrency = (value: number) => `$${value.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: value < 1 ? 6 : 2,
   })}`;
   
-  const formatDate = (value: number) => format(new Date(value), 'MMM d, yyyy');
+  const formatDate = (value: number) => {
+    if (days === 1) {
+      return format(new Date(value), 'p');
+    }
+    return format(new Date(value), 'MMM d, yyyy');
+  };
 
   const ChartTooltipContent = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -96,6 +105,7 @@ export function CoinChart({ coinId, initialData }: CoinChartProps) {
             variant={days === range.days ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setDays(range.days)}
+            disabled={loading}
           >
             {range.label}
           </Button>
