@@ -20,6 +20,21 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
     }).format(amount);
   }
 
+  const formatPercentage = (percentage: number) => {
+    return `${percentage.toFixed(2)}%`;
+  }
+
+  const SocialLink = ({ href, icon, label }: { href?: string; icon: React.ReactNode; label: string; }) => {
+    if (!href) return null;
+    return (
+      <Button variant="outline" asChild className="w-full justify-start gap-2">
+        <Link href={href} target="_blank">
+          {icon} {label}
+        </Link>
+      </Button>
+    )
+  }
+
   return (
     <div className="container py-12">
       <div className="grid md:grid-cols-3 gap-8">
@@ -84,41 +99,11 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
               <CardTitle>Links</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {coin.links.homepage[0] && (
-                <Button variant="outline" asChild className="w-full justify-start gap-2">
-                  <Link href={coin.links.homepage[0]} target="_blank">
-                    <Globe /> Website
-                  </Link>
-                </Button>
-              )}
-              {coin.links.blockchain_site[0] && (
-                <Button variant="outline" asChild className="w-full justify-start gap-2">
-                  <Link href={coin.links.blockchain_site[0]} target="_blank">
-                    <ExternalLink /> Explorer
-                  </Link>
-                </Button>
-              )}
-              {coin.links.twitter_screen_name && (
-                 <Button variant="outline" asChild className="w-full justify-start gap-2">
-                  <Link href={`https://twitter.com/${coin.links.twitter_screen_name}`} target="_blank">
-                    <Twitter /> Twitter
-                  </Link>
-                </Button>
-              )}
-               {coin.links.chat_url[0] && (
-                 <Button variant="outline" asChild className="w-full justify-start gap-2">
-                  <Link href={coin.links.chat_url[0]} target="_blank">
-                    <MessageCircle /> Chat
-                  </Link>
-                 </Button>
-              )}
-               {coin.links.repos_url.github[0] && (
-                 <Button variant="outline" asChild className="w-full justify-start gap-2">
-                  <Link href={coin.links.repos_url.github[0]} target="_blank">
-                    <Github /> Github
-                  </Link>
-                 </Button>
-              )}
+              <SocialLink href={coin.links.homepage[0]} icon={<Globe />} label="Website" />
+              <SocialLink href={coin.links.blockchain_site[0]} icon={<ExternalLink />} label="Explorer" />
+              <SocialLink href={coin.links.twitter_screen_name ? `https://twitter.com/${coin.links.twitter_screen_name}` : undefined} icon={<Twitter />} label="Twitter" />
+              <SocialLink href={coin.links.chat_url[0]} icon={<MessageCircle />} label="Chat" />
+              <SocialLink href={coin.links.repos_url.github[0]} icon={<Github />} label="Github" />
             </CardContent>
           </Card>
         </div>
