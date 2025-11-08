@@ -56,7 +56,7 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'coming-soon';
 }
 
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
@@ -129,6 +129,20 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       } else {
         setGameState('lost');
         setResult({ title: "You Lost!", variant: 'destructive', description: `Your snake only grew to ${length}. Try again!` });
+      }
+    }, 1500);
+  };
+
+  const handleCryptoRacers = () => {
+    setGameState('loading');
+    setTimeout(() => {
+      const position = Math.floor(Math.random() * 5) + 1;
+      if (position === 1) {
+        setGameState('won');
+        setResult({ title: "You Won!", variant: 'default', description: `You finished in 1st place!` });
+      } else {
+        setGameState('lost');
+        setResult({ title: "You Lost!", variant: 'destructive', description: `You finished in position #${position}. Try for first!` });
       }
     }, 1500);
   };
@@ -237,6 +251,29 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </>
         );
+      case 'crypto-racers':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">Start your Engine!</p>
+                <p className="text-lg text-muted-foreground">
+                  Click race to see if you win!
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                <Button size="lg" onClick={handleCryptoRacers}>Race!</Button>
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -276,7 +313,7 @@ const games = [
     { title: "Coin Toss", icon: <Coins className="h-8 w-8 text-primary" />, description: "A classic fifty-fifty. Heads or Tails? You decide.", gameType: 'coin-toss' as const, isActive: true },
     { title: "Crypto Ludo", icon: <Dice5 className="h-8 w-8 text-primary" />, description: "Roll a 6 to win the pot! A simple dice game.", gameType: 'crypto-ludo' as const, isActive: true },
     { title: "Ether Snake", icon: <SnakeIcon className="h-8 w-8 text-primary" />, description: "Grow your snake by eating ether tokens.", gameType: 'ether-snake' as const, isActive: true },
-    { title: "Crypto Racers", icon: <Car className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Crypto Racers", icon: <Car className="h-8 w-8 text-primary" />, description: "A new crypto game. Click to learn more!", gameType: 'crypto-racers' as const, isActive: true },
     { title: "Bitcoin Poker", icon: <Users className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "AI Blackjack", icon: <Bot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Doge Roulette", icon: <CircleDot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
