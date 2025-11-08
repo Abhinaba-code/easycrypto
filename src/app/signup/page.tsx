@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -40,6 +41,7 @@ const formSchema = z.object({
 
 export default function SignUpPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,8 +55,9 @@ export default function SignUpPage() {
     console.log(values);
     toast({
         title: "Account Created!",
-        description: "You have successfully signed up. You can now log in.",
+        description: "You have successfully signed up. Redirecting to your dashboard.",
     });
+    router.push('/dashboard');
   }
 
   return (
