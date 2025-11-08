@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gamepad2, Coins, Loader2, RefreshCw, Wallet, PiggyBank, Car, Users, Bot, CircleDot, Asterisk, CandlestickChart, Rocket, Hand, Diamond, Clapperboard, Puzzle, Swords, Dice5, Target, Zap } from 'lucide-react';
+import { Gamepad2, Coins, Loader2, RefreshCw, Wallet, PiggyBank, Car, Users, Bot, CircleDot, Asterisk, CandlestickChart, Rocket, Hand, Diamond, Clapperboard, Puzzle, Swords, Dice5, Target, Zap, LogIn } from 'lucide-react';
 import { getCoinDetails } from '@/lib/coingecko';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/auth-context';
 
 
 const SnakeIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -64,6 +65,7 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
   const [initialPrice, setInitialPrice] = useState<number | null>(null);
   const [result, setResult] = useState<GameResult>(null);
   const router = useRouter();
+  const { user } = useAuth();
 
 
   const fetchBtcPrice = useCallback(async () => {
@@ -89,10 +91,10 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
   }, [fetchBtcPrice, gameType]);
 
   useEffect(() => {
-    if (isActive) {
+    if (isActive && user) {
       resetGame();
     }
-  }, [resetGame, isActive]);
+  }, [resetGame, isActive, user]);
 
   const handleCryptoFlipGuess = (guess: 'up' | 'down') => {
     if (!initialPrice) return;
@@ -157,6 +159,16 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
     }, 1500);
   };
 
+  const renderLoginPrompt = () => (
+    <>
+      <p className="text-lg text-muted-foreground">Log in to play this game!</p>
+      <Button size="lg" onClick={() => router.push('/login')}>
+        <LogIn className="mr-2" />
+        Login to Play
+      </Button>
+    </>
+  )
+
 
   if (!isActive) {
     return (
@@ -185,6 +197,8 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
   }
 
   const renderGameContent = () => {
+    if (!user) return renderLoginPrompt();
+    
     switch (gameType) {
       case 'crypto-flip':
         return (
@@ -312,14 +326,14 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center space-y-4 min-h-[160px]">
-        {gameState === 'loading' && gameType !== 'crypto-flip' ? (
+        {gameState === 'loading' && gameType !== 'crypto-flip' && user ? (
           <div className="flex flex-col items-center space-y-2">
             <Loader2 className="animate-spin h-8 w-8 text-primary" />
              <p className="text-muted-foreground">Loading Game...</p>
           </div>
         ) : renderGameContent()}
         
-        {(gameState === 'won' || gameState === 'lost') && (
+        {(gameState === 'won' || gameState === 'lost') && user && (
           <Button size="lg" variant="outline" onClick={resetGame}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Play Again
@@ -355,7 +369,7 @@ const games = [
 
 
 export default function ArcadePage() {
-  
+  const { user } = useAuth();
   return (
     <div className="container py-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -363,15 +377,17 @@ export default function ArcadePage() {
           <Gamepad2 className="h-8 w-8" />
           <h1 className="text-3xl font-headline font-bold">Crypto Arcade</h1>
         </div>
-        <Card className="w-full sm:w-auto">
-          <CardHeader className="flex flex-row items-center gap-4 p-4">
-            <Wallet className="h-6 w-6 text-primary" />
-            <div>
-              <CardTitle className="text-sm font-medium leading-none">Virtual Wallet</CardTitle>
-              <p className="text-2xl font-bold">$1,000</p>
-            </div>
-          </CardHeader>
-        </Card>
+       {user && (
+         <Card className="w-full sm:w-auto">
+            <CardHeader className="flex flex-row items-center gap-4 p-4">
+              <Wallet className="h-6 w-6 text-primary" />
+              <div>
+                <CardTitle className="text-sm font-medium leading-none">Virtual Wallet</CardTitle>
+                <p className="text-2xl font-bold">$1,000</p>
+              </div>
+            </CardHeader>
+          </Card>
+        )}
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {games.map(game => (
