@@ -33,13 +33,15 @@ export default function CryptoRacersPage() {
     const raceInterval = setInterval(() => {
       setCarPositions(prevPositions => {
         const newPositions = prevPositions.map(p => p + Math.random() * 3);
-        const leader = newPositions.find(p => p >= 100);
+        const leaderPosition = Math.max(...newPositions);
         
-        if (leader) {
+        if (leaderPosition >= 100) {
           clearInterval(raceInterval);
           setRaceState('finished');
-          const winnerIndex = newPositions.indexOf(leader);
+          const winnerIndex = newPositions.findIndex(p => p >= 100);
           setWinner(winnerIndex);
+           // Ensure all cars that passed the finish line are set to 100
+          return newPositions.map(p => Math.min(p, 100));
         }
         
         return newPositions;
@@ -66,7 +68,7 @@ export default function CryptoRacersPage() {
               <div key={index} className="relative w-full h-10 bg-muted rounded-full">
                 <div 
                   className={cn("absolute top-0 left-0 h-10 flex items-center transition-all duration-100 ease-linear", carColors[index])}
-                  style={{ transform: `translateX(calc(${Math.min(position, 100)}% - 40px))` }}
+                  style={{ transform: `translateX(calc(${Math.min(position, 100)}% - ${position >= 100 ? '40px' : '0px'}))` }}
                 >
                   <Car className="w-10 h-10" />
                 </div>
@@ -107,5 +109,3 @@ export default function CryptoRacersPage() {
     </div>
   );
 }
-
-    
