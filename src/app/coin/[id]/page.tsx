@@ -26,7 +26,7 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
       minimumFractionDigits: 2,
       maximumFractionDigits: 6,
     }).format(amount);
-  }
+  };
   
   const Percentage = ({ value }: { value?: number }) => {
     if (typeof value !== 'number') {
@@ -49,8 +49,8 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
           {icon} {label}
         </Link>
       </Button>
-    )
-  }
+    );
+  };
 
   const RedditIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
