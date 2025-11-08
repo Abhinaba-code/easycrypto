@@ -1,3 +1,4 @@
+
 import type { Coin, MarketChart } from '@/lib/types';
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
@@ -20,9 +21,9 @@ async function fetchAPI<T>(endpoint: string): Promise<T> {
 }
 
 
-export async function getTopCoins(): Promise<Coin[]> {
+export async function getTopCoins(page: number = 1): Promise<Coin[]> {
   try {
-    const data = await fetchAPI<Coin[]>('/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=24h');
+    const data = await fetchAPI<Coin[]>(`/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=${page}&sparkline=true&price_change_percentage=24h`);
     return data;
   } catch (error) {
     return []; // Return empty array on error to prevent crashing the page

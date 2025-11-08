@@ -29,8 +29,10 @@ export function CryptoTable({ coins, onRecommend }: CryptoTableProps) {
             <TableHead>Coin</TableHead>
             <TableHead className="text-right">Price</TableHead>
             <TableHead className="text-right">24h %</TableHead>
-            <TableHead className="text-right hidden md:table-cell">Market Cap</TableHead>
-            <TableHead className="text-right hidden lg:table-cell">Volume (24h)</TableHead>
+            <TableHead className="text-right hidden md:table-cell">24h High</TableHead>
+            <TableHead className="text-right hidden md:table-cell">24h Low</TableHead>
+            <TableHead className="text-right hidden lg:table-cell">Market Cap</TableHead>
+            <TableHead className="text-right hidden lg:table-cell">Circulating Supply</TableHead>
             <TableHead className="text-center hidden sm:table-cell">Last 7 Days</TableHead>
             <TableHead className="w-[120px]"></TableHead>
           </TableRow>
@@ -63,11 +65,17 @@ export function CryptoTable({ coins, onRecommend }: CryptoTableProps) {
               )}>
                 {coin.price_change_percentage_24h.toFixed(2)}%
               </TableCell>
-              <TableCell className="text-right hidden md:table-cell">
-                ${coin.market_cap.toLocaleString()}
+              <TableCell className="text-right hidden md:table-cell text-green-500">
+                ${coin.high_24h.toLocaleString()}
+              </TableCell>
+              <TableCell className="text-right hidden md:table-cell text-red-500">
+                ${coin.low_24h.toLocaleString()}
               </TableCell>
               <TableCell className="text-right hidden lg:table-cell">
-                 ${coin.total_volume.toLocaleString()}
+                ${coin.market_cap.toLocaleString()}
+              </TableCell>
+               <TableCell className="text-right hidden lg:table-cell">
+                {coin.circulating_supply.toLocaleString()} {coin.symbol.toUpperCase()}
               </TableCell>
               <TableCell className="w-[150px] h-[60px] hidden sm:table-cell">
                 <SparklineChart 

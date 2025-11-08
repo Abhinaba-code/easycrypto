@@ -1,17 +1,23 @@
+
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import type { Coin } from '@/lib/types';
 import { Button } from './ui/button';
 import { CryptoTable } from './crypto-table';
 import { RecommendationModal } from './recommendation-modal';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface LandingPageProps {
   initialCoins: Coin[];
+  currentPage: number;
 }
 
-export function LandingPage({ initialCoins }: LandingPageProps) {
+export function LandingPage({ initialCoins, currentPage }: LandingPageProps) {
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
+
+  const hasNextPage = initialCoins.length === 50;
 
   return (
     <>
@@ -36,8 +42,23 @@ export function LandingPage({ initialCoins }: LandingPageProps) {
         </section>
 
         <section className="pb-12">
-            <h2 className="text-2xl font-headline font-bold text-center mb-8">Top 50 Cryptocurrencies</h2>
+            <h2 className="text-2xl font-headline font-bold text-center mb-8">Top Cryptocurrencies</h2>
             <CryptoTable coins={initialCoins} onRecommend={setSelectedCoin} />
+            <div className="flex justify-center items-center gap-4 mt-8">
+              <Button asChild variant="outline" disabled={currentPage <= 1}>
+                <Link href={`/?page=${currentPage - 1}`}>
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Previous
+                </Link>
+              </Button>
+              <span className="text-muted-foreground">Page {currentPage}</span>
+              <Button asChild variant="outline" disabled={!hasNextPage}>
+                <Link href={`/?page=${currentPage + 1}`}>
+                  Next
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
         </section>
       </div>
 
