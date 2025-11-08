@@ -27,7 +27,7 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
           <Card>
             <CardHeader>
               <div className="flex items-center gap-4">
-                <Image src={coin.image} alt={coin.name} width={64} height={64} />
+                {coin.image && <Image src={coin.image} alt={coin.name} width={64} height={64} />}
                 <div>
                   <CardTitle className="text-4xl font-headline">{coin.name} <span className="text-2xl text-muted-foreground uppercase">{coin.symbol}</span></CardTitle>
                   <div className="text-4xl font-bold mt-2">
@@ -126,4 +126,3 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
     </div>
   );
 }
-

@@ -57,10 +57,15 @@ export interface CoinCapAsset {
   vwap24Hr: string;
 }
 
-export interface CoinDetails extends Coin {
+export interface CoinDetails {
+  id: string;
+  symbol: string;
+  name: string;
+  image: string;
   description: {
     en: string;
   };
+  market_cap_rank: number;
   links: {
     homepage: string[];
     blockchain_site: string[];

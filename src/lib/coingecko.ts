@@ -35,5 +35,21 @@ export async function getMarketChart(coinId: string, days: number = 7): Promise<
 }
 
 export async function getCoinDetails(coinId: string): Promise<CoinDetails> {
-  return fetchAPI<CoinDetails>(`/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`);
+  const data = await fetchAPI<any>(`/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=true&developer_data=true&sparkline=false`);
+  
+  // The coingecko API for coin details returns 'image' as an object with different sizes
+  // We need to pick one, so we'll use the 'large' one.
+  // It also sometimes returns empty strings for links, which we should handle.
+  return {
+    ...data,
+    image: data.image?.large || '',
+    links: {
+      ...data.links,
+      homepage: data.links.homepage.filter((l:string) => l),
+      blockchain_site: data.links.blockchain_site.filter((l:string) => l),
+      official_forum_url: data.links.official_forum_url.filter((l:string) => l),
+      chat_url: data.links.chat_url.filter((l:string) => l),
+      announcement_url: data.links.announcement_url.filter((l:string) => l),
+    }
+  }
 }
