@@ -111,7 +111,7 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
            <Card>
             <CardHeader>
               <CardTitle>Description</CardTitle>
-            </CardHeader>
+            </Header>
             <CardContent>
               {coin.description.en ? (
                 <div
@@ -206,11 +206,16 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
       </div>
       
       {!isNewsConfigured && (
-         <Alert variant="default" className="my-8">
+         <Alert variant="default" className="my-8 container">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>News section not configured</AlertTitle>
+            <AlertTitle>News Feature Not Configured</AlertTitle>
             <AlertDescription>
-              To see the latest news, please add your CryptoCompare API key to the <code>.env</code> file.
+              To see the latest news for this coin, you need to add a free API key from CryptoCompare.
+              <ol className="list-decimal list-inside mt-2">
+                <li>Get your key from <a href="https://www.cryptocompare.com/cryptopian/api-keys" target="_blank" rel="noopener noreferrer" className="underline font-medium">CryptoCompare</a>.</li>
+                <li>Create a file named <code>.env</code> in the project root.</li>
+                <li>Add this line to it: <code>CRYPTOCOMPARE_API_KEY=your_api_key_here</code></li>
+              </ol>
             </AlertDescription>
           </Alert>
       )}
@@ -218,7 +223,7 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
       {isNewsConfigured && news && news.length > 0 && (
         <div className="py-12">
           <h2 className="text-2xl font-headline font-bold text-center mb-8">Latest News</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {news.map(article => (
               <NewsCard key={article.id} article={article} />
             ))}
