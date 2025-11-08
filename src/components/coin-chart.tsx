@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { getMarketChart } from '@/lib/coincap';
+import { getMarketChart } from '@/lib/coingecko';
 import type { MarketChart as MarketChartType } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -118,12 +118,20 @@ export function CoinChart({ coinId, initialData }: CoinChartProps) {
       {loading ? (
         <Skeleton className="h-[300px] w-full" />
       ) : (
-        <Tabs defaultValue="price">
-          <TabsList className="grid w-full grid-cols-1">
+        <Tabs defaultValue="price" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="price">Price</TabsTrigger>
+            <TabsTrigger value="market_cap">Market Cap</TabsTrigger>
+            <TabsTrigger value="volume">Volume</TabsTrigger>
           </TabsList>
           <TabsContent value="price">
             <Chart dataKey="prices" name="Price" color="hsl(var(--primary))" />
+          </TabsContent>
+          <TabsContent value="market_cap">
+            <Chart dataKey="market_caps" name="Market Cap" color="hsl(var(--accent))" />
+          </TabsContent>
+          <TabsContent value="volume">
+             <Chart dataKey="total_volumes" name="Volume" color="hsl(var(--secondary))" />
           </TabsContent>
         </Tabs>
       )}
