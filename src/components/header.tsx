@@ -36,7 +36,7 @@ const navLinks = [
   { href: '/games', label: 'Arcade' },
 ];
 
-const mobileNavLinks = [...navLinks, { href: '/profile', label: 'Profile' }];
+const mobileNavLinks = [...navLinks, { href: '/profile', label: 'Profile' }, { href: '/settings', label: 'Settings' }];
 
 export function Header() {
   const isMobile = useIsMobile();
@@ -154,7 +154,7 @@ export function Header() {
                       <span>Billing</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                       <Link href="/profile">
+                       <Link href="/settings">
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
                       </Link>
