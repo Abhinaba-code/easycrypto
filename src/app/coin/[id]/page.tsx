@@ -12,78 +12,78 @@ import { getNews } from '@/lib/cryptocompare';
 import type { NewsArticle } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+const formatCurrency = (amount?: number, currency: string = 'usd') => {
+  if (typeof amount !== 'number') return 'N/A';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 6,
+  }).format(amount);
+};
+
+const Percentage = ({ value }: { value?: number }) => {
+  if (typeof value !== 'number') {
+    return <span className="text-muted-foreground">N/A</span>;
+  }
+  const isPositive = value > 0;
+  return (
+    <span className={cn(isPositive ? 'text-green-500' : 'text-red-500', 'font-medium flex items-center')}>
+      {isPositive ? <TrendingUp className="mr-1 h-4 w-4" /> : <TrendingDown className="mr-1 h-4 w-4" />}
+      {value.toFixed(2)}%
+    </span>
+  );
+};
+
+const SocialLink = ({ href, icon, label }: { href?: string; icon: React.ReactNode; label: string; }) => {
+  if (!href) return null;
+  return (
+    <Button variant="outline" asChild className="w-full justify-start gap-2">
+      <Link href={href} target="_blank" rel="noopener noreferrer">
+        {icon} {label}
+      </Link>
+    </Button>
+  );
+};
+
+const RedditIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+    <path d="M16.5 10c-.99 0-1.8.4-2.4 1-.6-.6-1.41-1-2.4-1-.99 0-1.8.4-2.4 1-.6-.6-1.41-1-2.4-1-1.4 0-2.5 1.1-2.5 2.5 0 1.15.75 2.1 1.75 2.4L6.5 18H8v-2.5c0-.28.22-.5.5-.5h7c.28 0 .5.22.5.5V18h1.5l.75-3.1c1-.3 1.75-1.25 1.75-2.4 0-1.4-1.1-2.5-2.5-2.5z" />
+    <circle cx="8.5" cy="10.5" r=".5" fill="currentColor" />
+    <circle cx="15.5" cy="10.5" r=".5" fill="currentColor" />
+  </svg>
+);
+
+const NewsCard = ({ article }: { article: NewsArticle }) => (
+  <Card className="overflow-hidden">
+    <Image src={article.imageurl} alt={article.title} width={400} height={200} className="w-full h-32 object-cover" />
+    <CardContent className="p-4">
+      <h3 className="font-bold text-sm leading-snug mb-2 line-clamp-2">{article.title}</h3>
+      <p className="text-xs text-muted-foreground mb-2">{article.source}</p>
+      <Button variant="link" size="sm" asChild className="p-0 h-auto">
+        <Link href={article.url} target="_blank" rel="noopener noreferrer">
+          Read More <ExternalLink className="ml-1 h-3 w-3" />
+        </Link>
+      </Button>
+    </CardContent>
+  </Card>
+);
+
 export default async function CoinDetailsPage({ params }: { params: { id: string } }) {
   const coin = await getCoinDetails(params.id);
   const initialChartData = await getMarketChart(params.id, 7);
   const news = await getNews(coin.symbol);
   const isNewsConfigured = !!process.env.CRYPTOCOMPARE_API_KEY;
-
-  const formatCurrency = (amount?: number, currency: string = 'usd') => {
-    if (typeof amount !== 'number') return 'N/A';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 6,
-    }).format(amount);
-  };
-  
-  const Percentage = ({ value }: { value?: number }) => {
-    if (typeof value !== 'number') {
-      return <span className="text-muted-foreground">N/A</span>;
-    }
-    const isPositive = value > 0;
-    return (
-      <span className={cn(isPositive ? 'text-green-500' : 'text-red-500', 'font-medium flex items-center')}>
-        {isPositive ? <TrendingUp className="mr-1 h-4 w-4" /> : <TrendingDown className="mr-1 h-4 w-4" />}
-        {value.toFixed(2)}%
-      </span>
-    );
-  };
-
-  const SocialLink = ({ href, icon, label }: { href?: string; icon: React.ReactNode; label: string; }) => {
-    if (!href) return null;
-    return (
-      <Button variant="outline" asChild className="w-full justify-start gap-2">
-        <Link href={href} target="_blank" rel="noopener noreferrer">
-          {icon} {label}
-        </Link>
-      </Button>
-    );
-  };
-
-  const RedditIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-      <path d="M16.5 10c-.99 0-1.8.4-2.4 1-.6-.6-1.41-1-2.4-1-.99 0-1.8.4-2.4 1-.6-.6-1.41-1-2.4-1-1.4 0-2.5 1.1-2.5 2.5 0 1.15.75 2.1 1.75 2.4L6.5 18H8v-2.5c0-.28.22-.5.5-.5h7c.28 0 .5.22.5.5V18h1.5l.75-3.1c1-.3 1.75-1.25 1.75-2.4 0-1.4-1.1-2.5-2.5-2.5z" />
-      <circle cx="8.5" cy="10.5" r=".5" fill="currentColor" />
-      <circle cx="15.5" cy="10.5" r=".5" fill="currentColor" />
-    </svg>
-  );
-
-  const NewsCard = ({ article }: { article: NewsArticle }) => (
-    <Card className="overflow-hidden">
-      <Image src={article.imageurl} alt={article.title} width={400} height={200} className="w-full h-32 object-cover" />
-      <CardContent className="p-4">
-        <h3 className="font-bold text-sm leading-snug mb-2 line-clamp-2">{article.title}</h3>
-        <p className="text-xs text-muted-foreground mb-2">{article.source}</p>
-        <Button variant="link" size="sm" asChild className="p-0 h-auto">
-          <Link href={article.url} target="_blank" rel="noopener noreferrer">
-            Read More <ExternalLink className="ml-1 h-3 w-3" />
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <div className="container py-12">
@@ -111,7 +111,7 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
            <Card>
             <CardHeader>
               <CardTitle>Description</CardTitle>
-            </Header>
+            </CardHeader>
             <CardContent>
               {coin.description.en ? (
                 <div
@@ -233,3 +233,5 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
     </div>
   );
 }
+
+    
