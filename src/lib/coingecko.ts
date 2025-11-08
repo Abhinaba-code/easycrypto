@@ -1,5 +1,5 @@
 
-import type { Coin, MarketChart } from '@/lib/types';
+import type { Coin, CoinDetails, MarketChart } from '@/lib/types';
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 
@@ -32,4 +32,8 @@ export async function getTopCoins(page: number = 1): Promise<Coin[]> {
 
 export async function getMarketChart(coinId: string, days: number = 7): Promise<MarketChart> {
     return fetchAPI<MarketChart>(`/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`);
+}
+
+export async function getCoinDetails(coinId: string): Promise<CoinDetails> {
+  return fetchAPI<CoinDetails>(`/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`);
 }

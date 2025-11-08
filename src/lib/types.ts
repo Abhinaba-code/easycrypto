@@ -56,3 +56,30 @@ export interface CoinCapAsset {
   changePercent24Hr: string;
   vwap24Hr: string;
 }
+
+export interface CoinDetails extends Coin {
+  description: {
+    en: string;
+  };
+  links: {
+    homepage: string[];
+    blockchain_site: string[];
+    official_forum_url: string[];
+    chat_url: string[];
+    announcement_url: string[];
+    twitter_screen_name: string;
+    facebook_username: string;
+    subreddit_url: string;
+    repos_url: {
+      github: string[];
+    }
+  };
+  market_data: {
+    current_price: { [key: string]: number };
+    total_supply: number;
+    max_supply: number;
+    circulating_supply: number;
+    total_volume: { [key: string]: number };
+    market_cap: { [key: string]: number };
+  }
+}

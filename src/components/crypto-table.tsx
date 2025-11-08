@@ -1,4 +1,5 @@
 
+'use client';
 import Image from 'next/image';
 import {
   Table,
@@ -13,6 +14,7 @@ import type { Coin } from '@/lib/types';
 import { SparklineChart } from './sparkline-chart';
 import { cn } from '@/lib/utils';
 import { Badge } from './ui/badge';
+import { useRouter } from 'next/navigation';
 
 interface CryptoTableProps {
   coins: Coin[];
@@ -20,6 +22,12 @@ interface CryptoTableProps {
 }
 
 export function CryptoTable({ coins, onRecommend }: CryptoTableProps) {
+  const router = useRouter();
+
+  const handleRowClick = (coinId: string) => {
+    router.push(`/coin/${coinId}`);
+  };
+
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
       <Table>
@@ -39,7 +47,7 @@ export function CryptoTable({ coins, onRecommend }: CryptoTableProps) {
         </TableHeader>
         <TableBody>
           {coins.map((coin) => (
-            <TableRow key={coin.id}>
+            <TableRow key={coin.id} onClick={() => handleRowClick(coin.id)} className="cursor-pointer">
               <TableCell className="text-center text-muted-foreground">{coin.market_cap_rank}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-3">
@@ -84,7 +92,7 @@ export function CryptoTable({ coins, onRecommend }: CryptoTableProps) {
                 />
               </TableCell>
               <TableCell className="text-right">
-                <Button size="sm" onClick={() => onRecommend(coin)}>Get Recs</Button>
+                <Button size="sm" onClick={(e) => { e.stopPropagation(); onRecommend(coin); }}>Get Recs</Button>
               </TableCell>
             </TableRow>
           ))}
