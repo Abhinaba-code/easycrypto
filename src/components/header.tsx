@@ -10,9 +10,11 @@ import { Logo } from '@/components/logo';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/games', label: 'Arcade' },
-  { href: '/profile', label: 'Profile' },
+  { href: '/', label: 'Top Coins' },
+  { href: '/trending', label: 'Trending' },
+  { href: '/exchanges', label: 'Exchanges' },
+  { href: '/nft', label: 'NFTs' },
+  { href: '/defi', label: 'DeFi' },
 ];
 
 export function Header() {
