@@ -69,13 +69,17 @@ function LandingPage() {
               arcade of fake-coin games.
             </p>
             <div className="flex w-full items-center justify-center space-x-4 py-4 md:pb-10">
-              <Button size="lg" className="rounded-full">Get Started</Button>
-              <Button size="lg" variant="outline" className="rounded-full">Learn More</Button>
+              <Button size="lg" className="rounded-full" asChild>
+                <Link href="/dashboard">Get Started</Link>
+              </Button>
+              <Button size="lg" variant="outline" className="rounded-full" asChild>
+                <Link href="#top-coins">Learn More</Link>
+              </Button>
             </div>
           </div>
         </section>
 
-        <section className="pb-12">
+        <section id="top-coins" className="pb-12">
             <h2 className="text-2xl font-headline font-bold text-center mb-8">Top Cryptocurrencies</h2>
             {loading ? (
               <div className="space-y-2">
