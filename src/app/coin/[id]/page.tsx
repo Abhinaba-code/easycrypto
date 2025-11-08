@@ -3,7 +3,7 @@ import { getCoinDetails, getMarketChart } from '@/lib/coingecko';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
+import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle, Gamepad2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -202,6 +202,22 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
               <SocialLink href={coin.links.repos_url.github[0]} icon={<Github />} label="Github" />
             </CardContent>
           </Card>
+          
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Gamepad2 className="h-6 w-6 text-primary" />
+                <CardTitle>Earn Crypto</CardTitle>
+              </div>
+              <CardDescription>Play games in the Crypto Arcade to earn virtual rewards.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center justify-center text-center">
+              <p className="mb-4 text-muted-foreground">Test your luck and skill in the arcade!</p>
+              <Button asChild size="lg">
+                <Link href="/games">Go to Arcade</Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
       
@@ -233,5 +249,3 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
     </div>
   );
 }
-
-    
