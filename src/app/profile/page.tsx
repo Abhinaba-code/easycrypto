@@ -26,7 +26,7 @@ export default function ProfilePage() {
             <Button variant="outline">Edit Profile</Button>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="activity" className="w-full">
+          <Tabs defaultValue="settings" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="activity">
                 <Activity className="mr-2 h-4 w-4" /> Activity

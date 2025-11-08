@@ -98,7 +98,7 @@ export function Header() {
             </nav>
             <div className="flex flex-1 items-center justify-end space-x-4">
               <Button asChild>
-                <Link href="/auth/register">Sign Up</Link>
+                <Link href="#">Sign Up</Link>
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -125,17 +125,21 @@ export function Header() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <CreditCard className="mr-2 h-4 w-4" />
                       <span>Billing</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
+                    <DropdownMenuItem asChild>
+                       <Link href="/profile">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Settings</span>
+                      </Link>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
