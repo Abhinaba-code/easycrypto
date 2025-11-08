@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 
 const SnakeIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -61,9 +61,9 @@ interface GameCardProps {
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
   const [gameState, setGameState] = useState<'playing' | 'loading' | 'won' | 'lost'>('playing');
   const [initialPrice, setInitialPrice] = useState<number | null>(null);
-  const [finalPrice, setFinalPrice] = useState<number | null>(null);
-  const [userGuess, setUserGuess] = useState<string | null>(null);
   const [result, setResult] = useState<GameResult>(null);
+  const router = useRouter();
+
 
   const fetchBtcPrice = useCallback(async () => {
     try {
@@ -77,7 +77,6 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
 
   const resetGame = useCallback(() => {
     setGameState('playing');
-    setUserGuess(null);
     setResult(null);
     if (gameType === 'crypto-flip') {
       setGameState('loading');
@@ -95,28 +94,12 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
   }, [resetGame, isActive]);
 
   const handleCryptoFlipGuess = (guess: 'up' | 'down') => {
-    setUserGuess(guess);
+    if (!initialPrice) return;
     setGameState('loading');
-    setTimeout(async () => {
-      const newPrice = await fetchBtcPrice();
-      if (newPrice && initialPrice) {
-        setFinalPrice(newPrice);
-        const priceWentUp = newPrice > initialPrice;
-        if ((guess === 'up' && priceWentUp) || (guess === 'down' && !priceWentUp)) {
-          setGameState('won');
-          setResult({ title: "You Won!", variant: 'default', description: `The price went from $${initialPrice?.toLocaleString()} to $${newPrice?.toLocaleString()}.` });
-        } else {
-          setGameState('lost');
-          setResult({ title: "You Lost!", variant: 'destructive', description: `The price went from $${initialPrice?.toLocaleString()} to $${newPrice?.toLocaleString()}.` });
-        }
-      } else {
-        resetGame();
-      }
-    }, 3000);
+    router.push(`/games/crypto-flip/${guess}?price=${initialPrice}`);
   };
   
   const handleCoinTossGuess = (guess: 'heads' | 'tails') => {
-    setUserGuess(guess);
     setGameState('loading');
     setTimeout(() => {
       const coinResult = Math.random() > 0.5 ? 'heads' : 'tails';
@@ -190,19 +173,10 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       case 'crypto-flip':
         return (
           <>
-            {result ? (
-              <Alert variant={result.variant} className="text-center">
-                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
-                <AlertDescription>{result.description}</AlertDescription>
-              </Alert>
-            ) : (
-              <>
-                <p className="text-4xl font-bold">BTC</p>
-                <p className="text-lg text-muted-foreground">
-                  {gameState === 'loading' && !userGuess ? <Loader2 className="animate-spin" /> : `Current Price: $${initialPrice?.toLocaleString()}`}
-                </p>
-              </>
-            )}
+            <p className="text-4xl font-bold">BTC</p>
+            <p className="text-lg text-muted-foreground">
+              {gameState === 'loading' ? <Loader2 className="animate-spin" /> : `Current Price: $${initialPrice?.toLocaleString()}`}
+            </p>
 
             {gameState === 'playing' && (
               <div className="flex gap-4">
@@ -300,13 +274,7 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center space-y-4 min-h-[160px]">
         {renderGameContent()}
-        {gameState === 'loading' && userGuess && (
-          <div className="flex flex-col items-center space-y-2">
-            <Loader2 className="animate-spin h-8 w-8 text-primary" />
-             <p className="text-muted-foreground">Flipping... you guessed <span className="font-bold">{userGuess}</span>!</p>
-          </div>
-        )}
-        {gameState === 'loading' && !userGuess && gameType !== 'crypto-flip' && (
+        {gameState === 'loading' && gameType !== 'crypto-flip' &&(
           <div className="flex flex-col items-center space-y-2">
             <Loader2 className="animate-spin h-8 w-8 text-primary" />
              <p className="text-muted-foreground">Playing...</p>
@@ -324,10 +292,10 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
 };
 
 const games = [
-    { title: "Crypto Flip", icon: <Coins className="h-6 w-6 text-primary" />, description: "Guess if Bitcoin's price will rise or fall in the next 3 seconds.", gameType: 'crypto-flip' as const, isActive: true },
+    { title: "Crypto Flip", icon: <Coins className="h-6 w-6 text-primary" />, description: "Guess if Bitcoin's price will rise or fall.", gameType: 'crypto-flip' as const, isActive: true },
     { title: "Coin Toss", icon: <Coins className="h-8 w-8 text-primary" />, description: "A classic fifty-fifty. Heads or Tails? You decide.", gameType: 'coin-toss' as const, isActive: true },
     { title: "Crypto Ludo", icon: <Dice5 className="h-8 w-8 text-primary" />, description: "Roll a 6 to win the pot! A simple dice game.", gameType: 'crypto-ludo' as const, isActive: true },
-    { title: "Ether Snake", icon: <SnakeIcon className="h-8 w-8 text-primary" />, description: "A new crypto game. Click to learn more!", gameType: 'ether-snake' as const, isActive: true },
+    { title: "Ether Snake", icon: <SnakeIcon className="h-8 w-8 text-primary" />, description: "Grow your snake by eating ether tokens.", gameType: 'ether-snake' as const, isActive: true },
     { title: "Crypto Racers", icon: <Car className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Bitcoin Poker", icon: <Users className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "AI Blackjack", icon: <Bot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
@@ -374,3 +342,5 @@ export default function ArcadePage() {
     </div>
   );
 }
+
+    
