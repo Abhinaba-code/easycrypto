@@ -1,16 +1,17 @@
 
-import { getCoinDetails } from '@/lib/coingecko';
+import { getCoinDetails, getMarketChart } from '@/lib/coingecko';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, Clock, BarChart } from 'lucide-react';
+import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { CoinChart } from '@/components/coin-chart';
 
 export default async function CoinDetailsPage({ params }: { params: { id: string } }) {
   const coin = await getCoinDetails(params.id);
+  const initialChartData = await getMarketChart(params.id, 7);
 
   const formatCurrency = (amount?: number, currency: string = 'usd') => {
     if (typeof amount !== 'number') return 'N/A';
@@ -66,8 +67,8 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
 
   return (
     <div className="container py-12">
-      <div className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-8">
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-4">
@@ -83,24 +84,32 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              {coin.description.en && (
-                <>
-                  <h3 className="text-xl font-bold mb-4">Description</h3>
-                  <div
-                    className="prose dark:prose-invert text-muted-foreground max-w-none"
-                    dangerouslySetInnerHTML={{ __html: coin.description.en }}
-                  />
-                </>
-              )}
+             <CardContent>
+              <CoinChart coinId={params.id} initialData={initialChartData} />
             </CardContent>
           </Card>
            <Card>
             <CardHeader>
+              <CardTitle>Description</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {coin.description.en && (
+                <div
+                  className="prose dark:prose-invert text-muted-foreground max-w-none"
+                  dangerouslySetInnerHTML={{ __html: coin.description.en }}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
               <CardTitle>Price Performance</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+              <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 text-sm">
                 <div className="flex justify-between items-center border-b pb-2">
                   <span className="text-muted-foreground">24h</span>
                   <Percentage value={coin.market_data.price_change_percentage_24h} />
@@ -120,9 +129,6 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
               </div>
             </CardContent>
           </Card>
-        </div>
-        
-        <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Market Data</CardTitle>

@@ -31,7 +31,7 @@ export async function getTopCoins(page: number = 1): Promise<Coin[]> {
   }
 }
 
-export async function getMarketChart(coinId: string, days: number = 7): Promise<MarketChart> {
+export async function getMarketChart(coinId: string, days: number | string = 7): Promise<MarketChart> {
     return fetchAPI<MarketChart>(`/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`);
 }
 
