@@ -56,7 +56,7 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'coming-soon';
 }
 
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
@@ -136,6 +136,25 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
   const handleCryptoRacers = () => {
     setGameState('loading');
     router.push('/games/crypto-racers');
+  };
+  
+  const handleBitcoinPoker = () => {
+    setGameState('loading');
+    setTimeout(() => {
+      const hands = ["Royal Flush", "Straight Flush", "Four of a Kind", "Full House", "Flush", "Straight", "Three of a Kind", "Two Pair", "One Pair", "High Card"];
+      const yourHand = hands[Math.floor(Math.random() * hands.length)];
+      const opponentHand = hands[Math.floor(Math.random() * hands.length)];
+      const yourHandIndex = hands.indexOf(yourHand);
+      const opponentHandIndex = hands.indexOf(opponentHand);
+
+      if (yourHandIndex < opponentHandIndex) {
+        setGameState('won');
+        setResult({ title: "You Won!", variant: 'default', description: `Your ${yourHand} beats their ${opponentHand}!` });
+      } else {
+        setGameState('lost');
+        setResult({ title: "You Lost!", variant: 'destructive', description: `Their ${opponentHand} beats your ${yourHand}.` });
+      }
+    }, 1500);
   };
 
 
@@ -254,6 +273,29 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             </div>
           </>
         );
+      case 'bitcoin-poker':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">Best Hand Wins!</p>
+                <p className="text-lg text-muted-foreground">
+                  Click deal to see your hand.
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                <Button size="lg" onClick={handleBitcoinPoker}>Deal</Button>
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -294,7 +336,7 @@ const games = [
     { title: "Crypto Ludo", icon: <Dice5 className="h-8 w-8 text-primary" />, description: "Roll a 6 to win the pot! A simple dice game.", gameType: 'crypto-ludo' as const, isActive: true },
     { title: "Ether Snake", icon: <SnakeIcon className="h-8 w-8 text-primary" />, description: "Grow your snake by eating ether tokens.", gameType: 'ether-snake' as const, isActive: true },
     { title: "Crypto Racers", icon: <Car className="h-8 w-8 text-primary" />, description: "Beat the other cars to the finish line to win.", gameType: 'crypto-racers' as const, isActive: true },
-    { title: "Bitcoin Poker", icon: <Users className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Bitcoin Poker", icon: <Users className="h-8 w-8 text-primary" />, description: "A new crypto game. Click to learn more!", gameType: 'bitcoin-poker' as const, isActive: true },
     { title: "AI Blackjack", icon: <Bot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Doge Roulette", icon: <CircleDot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Shiba Slots", icon: <Asterisk className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
@@ -339,5 +381,3 @@ export default function ArcadePage() {
     </div>
   );
 }
-
-    
