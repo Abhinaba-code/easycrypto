@@ -68,7 +68,7 @@ export default function CryptoRacersPage() {
               <div key={index} className="relative w-full h-10 bg-muted rounded-full">
                 <div 
                   className={cn("absolute top-0 left-0 h-10 flex items-center transition-all duration-100 ease-linear", carColors[index])}
-                  style={{ transform: `translateX(calc(${Math.min(position, 100)}% - ${position >= 100 ? '40px' : '0px'}))` }}
+                  style={{ transform: `translateX(calc(${position}% - ${position >= 100 ? '100%' : '0px'}))` }}
                 >
                   <Car className="w-10 h-10" />
                 </div>
