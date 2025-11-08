@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useEffect, useState } from 'react';
 
 const navLinks = [
   { href: '/', label: 'Top Coins' },
@@ -39,7 +40,12 @@ const mobileNavLinks = [...navLinks, { href: '/profile', label: 'Profile' }];
 
 export function Header() {
   const isMobile = useIsMobile();
+  const [hasMounted, setHasMounted] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const navContent = (links: typeof navLinks) => (
     <>
@@ -55,6 +61,18 @@ export function Header() {
       ))}
     </>
   );
+  
+  if (!hasMounted) {
+    return (
+       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 items-center">
+          <div className="mr-4 flex items-center">
+            <Logo />
+          </div>
+        </div>
+      </header>
+    )
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
