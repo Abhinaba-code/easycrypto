@@ -55,7 +55,7 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'coming-soon';
 }
 
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
@@ -126,6 +126,20 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       } else {
         setGameState('lost');
         setResult({ title: "You Lost!", variant: 'destructive', description: `It was ${coinResult}!` });
+      }
+    }, 1500);
+  };
+  
+  const handleLudoRoll = () => {
+    setGameState('loading');
+    setTimeout(() => {
+      const diceRoll = Math.floor(Math.random() * 6) + 1;
+      if (diceRoll === 6) {
+        setGameState('won');
+        setResult({ title: "You Won!", variant: 'default', description: `You rolled a ${diceRoll}!` });
+      } else {
+        setGameState('lost');
+        setResult({ title: "You Lost!", variant: 'destructive', description: `You rolled a ${diceRoll}. You need a 6 to win.` });
       }
     }, 1500);
   };
@@ -209,6 +223,29 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </>
         );
+      case 'crypto-ludo':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">Roll a 6!</p>
+                <p className="text-lg text-muted-foreground">
+                  Roll the dice to get started.
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                <Button size="lg" onClick={handleLudoRoll}>Roll Dice</Button>
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -232,6 +269,12 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
              <p className="text-muted-foreground">Flipping... you guessed <span className="font-bold">{userGuess}</span>!</p>
           </div>
         )}
+        {gameState === 'loading' && !userGuess && gameType !== 'crypto-flip' && (
+          <div className="flex flex-col items-center space-y-2">
+            <Loader2 className="animate-spin h-8 w-8 text-primary" />
+             <p className="text-muted-foreground">Rolling...</p>
+          </div>
+        )}
         {(gameState === 'won' || gameState === 'lost') && (
           <Button size="lg" variant="outline" onClick={resetGame}>
             <RefreshCw className="mr-2 h-4 w-4" />
@@ -244,26 +287,26 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
 };
 
 const games = [
-    { title: "Crypto Flip", icon: <Coins className="h-6 w-6 text-primary" />, description: "Guess if Bitcoin's price will rise or fall in the next 3 seconds.", gameType: 'crypto-flip', isActive: true },
-    { title: "Coin Toss", icon: <Coins className="h-8 w-8 text-muted-foreground" />, description: "A classic fifty-fifty. Heads or Tails? You decide.", gameType: 'coin-toss', isActive: true },
-    { title: "Crypto Ludo", icon: <PiggyBank className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Ether Snake", icon: <SnakeIcon className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Crypto Racers", icon: <Car className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Bitcoin Poker", icon: <Users className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "AI Blackjack", icon: <Bot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Doge Roulette", icon: <CircleDot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Shiba Slots", icon: <Asterisk className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Futures Trading Sim", icon: <CandlestickChart className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "To The Moon Rocket", icon: <Rocket className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Crypto Hold'em", icon: <Hand className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Diamond Hands", icon: <Diamond className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "NFT Bingo", icon: <Clapperboard className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "DeFi Puzzle", icon: <Puzzle className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Chainlink Champions", icon: <Swords className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Ripple Dice", icon: <Dice5 className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Bullseye Bets", icon: <Target className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Token Tussle", icon: <Users className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
-    { title: "Gas Fee Gamble", icon: <Zap className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' },
+    { title: "Crypto Flip", icon: <Coins className="h-6 w-6 text-primary" />, description: "Guess if Bitcoin's price will rise or fall in the next 3 seconds.", gameType: 'crypto-flip' as const, isActive: true },
+    { title: "Coin Toss", icon: <Coins className="h-8 w-8 text-primary" />, description: "A classic fifty-fifty. Heads or Tails? You decide.", gameType: 'coin-toss' as const, isActive: true },
+    { title: "Crypto Ludo", icon: <Dice5 className="h-8 w-8 text-primary" />, description: "Roll a 6 to win the pot! A simple dice game.", gameType: 'crypto-ludo' as const, isActive: true },
+    { title: "Ether Snake", icon: <SnakeIcon className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Crypto Racers", icon: <Car className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Bitcoin Poker", icon: <Users className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "AI Blackjack", icon: <Bot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Doge Roulette", icon: <CircleDot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Shiba Slots", icon: <Asterisk className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Futures Trading Sim", icon: <CandlestickChart className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "To The Moon Rocket", icon: <Rocket className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Crypto Hold'em", icon: <Hand className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Diamond Hands", icon: <Diamond className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "NFT Bingo", icon: <Clapperboard className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "DeFi Puzzle", icon: <Puzzle className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Chainlink Champions", icon: <Swords className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Ripple Dice", icon: <Dice5 className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Bullseye Bets", icon: <Target className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Token Tussle", icon: <Users className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Gas Fee Gamble", icon: <Zap className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
 ];
 
 
