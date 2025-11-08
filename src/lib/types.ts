@@ -1,3 +1,4 @@
+
 export interface Coin {
   id: string;
   symbol: string;
@@ -40,4 +41,18 @@ export interface MarketChart {
     prices: [number, number][]; // [timestamp, price]
     market_caps: [number, number][];
     total_volumes: [number, number][];
+}
+
+export interface CoinCapAsset {
+  id: string;
+  rank: string;
+  symbol: string;
+  name: string;
+  supply: string;
+  maxSupply: string | null;
+  marketCapUsd: string;
+  volumeUsd24Hr: string;
+  priceUsd: string;
+  changePercent24Hr: string;
+  vwap24Hr: string;
 }
