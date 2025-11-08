@@ -94,3 +94,14 @@ export interface CoinDetails {
     price_change_percentage_1y: number;
   }
 }
+
+export interface NewsArticle {
+  id: string;
+  title: string;
+  url: string;
+  imageurl: string;
+  body: string;
+  tags: string;
+  categories: string;
+  source: string;
+}

@@ -8,10 +8,13 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CoinChart } from '@/components/coin-chart';
+import { getNews } from '@/lib/cryptocompare';
+import type { NewsArticle } from '@/lib/types';
 
 export default async function CoinDetailsPage({ params }: { params: { id: string } }) {
   const coin = await getCoinDetails(params.id);
   const initialChartData = await getMarketChart(params.id, 7);
+  const news = await getNews(coin.symbol);
 
   const formatCurrency = (amount?: number, currency: string = 'usd') => {
     if (typeof amount !== 'number') return 'N/A';
@@ -63,6 +66,21 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
       <circle cx="8.5" cy="10.5" r=".5" fill="currentColor" />
       <circle cx="15.5" cy="10.5" r=".5" fill="currentColor" />
     </svg>
+  );
+
+  const NewsCard = ({ article }: { article: NewsArticle }) => (
+    <Card className="overflow-hidden">
+      <Image src={article.imageurl} alt={article.title} width={400} height={200} className="w-full h-32 object-cover" />
+      <CardContent className="p-4">
+        <h3 className="font-bold text-sm leading-snug mb-2 line-clamp-2">{article.title}</h3>
+        <p className="text-xs text-muted-foreground mb-2">{article.source}</p>
+        <Button variant="link" size="sm" asChild className="p-0 h-auto">
+          <Link href={article.url} target="_blank" rel="noopener noreferrer">
+            Read More <ExternalLink className="ml-1 h-3 w-3" />
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
   );
 
   return (
@@ -184,6 +202,16 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
           </Card>
         </div>
       </div>
+      {news && news.length > 0 && (
+        <div className="container py-12">
+          <h2 className="text-2xl font-headline font-bold text-center mb-8">Latest News</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {news.map(article => (
+              <NewsCard key={article.id} article={article} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
