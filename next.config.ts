@@ -30,7 +30,8 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https'
+        ,
         hostname: 'assets.coincap.io',
         port: '',
         pathname: '/**',
@@ -44,6 +45,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'images.cryptocompare.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'icons.llamao.fi',
         port: '',
         pathname: '/**',
       }
