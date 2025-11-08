@@ -54,3 +54,27 @@ export async function getCoinDetails(coinId: string): Promise<CoinDetails> {
     }
   }
 }
+
+interface TrendingCoin {
+  item: {
+    id: string;
+    coin_id: number;
+    name: string;
+    symbol: string;
+    market_cap_rank: number;
+    thumb: string;
+    small: string;
+    large: string;
+    slug: string;
+    price_btc: number;
+    score: number;
+  }
+}
+export async function getTrendingCoins(): Promise<TrendingCoin[]> {
+  try {
+    const data = await fetchAPI<{ coins: TrendingCoin[] }>('/search/trending');
+    return data.coins;
+  } catch (error) {
+    return [];
+  }
+}
