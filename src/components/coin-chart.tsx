@@ -21,7 +21,6 @@ const timeRanges = [
   { label: '7D', days: 7 },
   { label: '1M', days: 30 },
   { label: '1Y', days: 365 },
-  { label: 'All', days: 'max' },
 ];
 
 export function CoinChart({ coinId, initialData }: CoinChartProps) {
