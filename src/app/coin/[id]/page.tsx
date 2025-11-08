@@ -3,18 +3,20 @@ import { getCoinDetails, getMarketChart } from '@/lib/coingecko';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown } from 'lucide-react';
+import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CoinChart } from '@/components/coin-chart';
 import { getNews } from '@/lib/cryptocompare';
 import type { NewsArticle } from '@/lib/types';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default async function CoinDetailsPage({ params }: { params: { id: string } }) {
   const coin = await getCoinDetails(params.id);
   const initialChartData = await getMarketChart(params.id, 7);
   const news = await getNews(coin.symbol);
+  const isNewsConfigured = !!process.env.CRYPTOCOMPARE_API_KEY;
 
   const formatCurrency = (amount?: number, currency: string = 'usd') => {
     if (typeof amount !== 'number') return 'N/A';
@@ -111,12 +113,12 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
               <CardTitle>Description</CardTitle>
             </CardHeader>
             <CardContent>
-              {coin.description.en && (
+              {coin.description.en ? (
                 <div
                   className="prose dark:prose-invert text-muted-foreground max-w-none"
                   dangerouslySetInnerHTML={{ __html: coin.description.en }}
                 />
-              )}
+              ) : <p className="text-muted-foreground">No description available.</p>}
             </CardContent>
           </Card>
         </div>
@@ -202,8 +204,19 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
           </Card>
         </div>
       </div>
-      {news && news.length > 0 && (
-        <div className="container py-12">
+      
+      {!isNewsConfigured && (
+         <Alert variant="default" className="my-8">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>News section not configured</AlertTitle>
+            <AlertDescription>
+              To see the latest news, please add your CryptoCompare API key to the <code>.env</code> file.
+            </AlertDescription>
+          </Alert>
+      )}
+
+      {isNewsConfigured && news && news.length > 0 && (
+        <div className="py-12">
           <h2 className="text-2xl font-headline font-bold text-center mb-8">Latest News</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {news.map(article => (
