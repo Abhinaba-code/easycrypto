@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -101,16 +102,7 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
   
   const handleCoinTossGuess = (guess: 'heads' | 'tails') => {
     setGameState('loading');
-    setTimeout(() => {
-      const coinResult = Math.random() > 0.5 ? 'heads' : 'tails';
-      if (guess === coinResult) {
-        setGameState('won');
-        setResult({ title: "You Won!", variant: 'default', description: `It was ${coinResult}!` });
-      } else {
-        setGameState('lost');
-        setResult({ title: "You Lost!", variant: 'destructive', description: `It was ${coinResult}!` });
-      }
-    }, 1500);
+    router.push(`/games/coin-toss/${guess}`);
   };
   
   const handleLudoRoll = () => {
@@ -189,26 +181,14 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       case 'coin-toss':
          return (
           <>
-            {result ? (
-              <Alert variant={result.variant} className="text-center">
-                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
-                <AlertDescription>{result.description}</AlertDescription>
-              </Alert>
-            ) : (
-              <>
-                <p className="text-4xl font-bold">Heads or Tails?</p>
-                <p className="text-lg text-muted-foreground">
-                  Call it in the air!
-                </p>
-              </>
-            )}
-
-            {gameState === 'playing' && (
-              <div className="flex gap-4">
-                <Button size="lg" onClick={() => handleCoinTossGuess('heads')}>Heads</Button>
-                <Button size="lg" onClick={() => handleCoinTossGuess('tails')}>Tails</Button>
-              </div>
-            )}
+            <p className="text-4xl font-bold">Heads or Tails?</p>
+            <p className="text-lg text-muted-foreground">
+              Call it in the air!
+            </p>
+            <div className="flex gap-4">
+              <Button size="lg" onClick={() => handleCoinTossGuess('heads')} disabled={gameState === 'loading'}>Heads</Button>
+              <Button size="lg" onClick={() => handleCoinTossGuess('tails')} disabled={gameState === 'loading'}>Tails</Button>
+            </div>
           </>
         );
       case 'crypto-ludo':
@@ -273,13 +253,13 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center space-y-4 min-h-[160px]">
-        {renderGameContent()}
-        {gameState === 'loading' && gameType !== 'crypto-flip' &&(
+        {gameState === 'loading' && gameType !== 'crypto-flip' ? (
           <div className="flex flex-col items-center space-y-2">
             <Loader2 className="animate-spin h-8 w-8 text-primary" />
              <p className="text-muted-foreground">Playing...</p>
           </div>
-        )}
+        ) : renderGameContent()}
+        
         {(gameState === 'won' || gameState === 'lost') && (
           <Button size="lg" variant="outline" onClick={resetGame}>
             <RefreshCw className="mr-2 h-4 w-4" />
@@ -342,5 +322,3 @@ export default function ArcadePage() {
     </div>
   );
 }
-
-    
