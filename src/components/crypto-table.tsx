@@ -47,7 +47,6 @@ export function CryptoTable({ coins, onRecommend }: CryptoTableProps) {
                     width={32}
                     height={32}
                     className="rounded-full"
-                    unoptimized // Add this for assets.coincap.io as they are SVGs/PNGs not optimized for next/image
                   />
                   <div>
                     <div className="font-bold">{coin.name}</div>

@@ -2,8 +2,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Coin } from '@/lib/types';
-import { getMarketChart } from '@/lib/coincap';
+import type { Coin, MarketChart } from '@/lib/types';
+import { getMarketChart } from '@/lib/coingecko';
 import {
   Dialog,
   DialogContent,
@@ -20,12 +20,6 @@ interface RecommendationModalProps {
   coin: Coin;
   isOpen: boolean;
   onClose: () => void;
-}
-
-interface MarketChart {
-    prices: [number, number][]; // [timestamp, price]
-    market_caps: [number, number][];
-    total_volumes: [number, number][];
 }
 
 export function RecommendationModal({ coin, isOpen, onClose }: RecommendationModalProps) {
