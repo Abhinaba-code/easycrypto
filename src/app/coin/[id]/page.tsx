@@ -1,10 +1,12 @@
 
 
+'use client';
+
 import { getCoinDetails, getMarketChart } from '@/lib/coingecko';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle, Gamepad2, CreditCard } from 'lucide-react';
+import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle, Gamepad2, CreditCard, Copy } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -15,6 +17,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
 
 const formatCurrency = (amount?: number, currency: string = 'usd') => {
   if (typeof amount !== 'number') return 'N/A';
@@ -83,19 +87,19 @@ const NewsCard = ({ article }: { article: NewsArticle }) => (
   </Card>
 );
 
-export default async function CoinDetailsPage({ params }: { params: { id: string } }) {
-  const coin = await getCoinDetails(params.id);
-  const initialChartData = await getMarketChart(params.id, 7);
-  const news = await getNews(coin.symbol);
-  const isNewsConfigured = !!process.env.CRYPTOCOMPARE_API_KEY;
 
-  const purchaseOptions = [
-    { amount: 100, discount: "2%" },
-    { amount: 250, discount: "3%" },
-    { amount: 500, discount: "5%" },
-    { amount: 750, discount: "7%" },
-    { amount: 1000, discount: "10%" },
-  ];
+function CoinDetailsPageContent({ coin, initialChartData, news, isNewsConfigured }: { coin: any, initialChartData: any, news: any, isNewsConfigured: boolean }) {
+  const { toast } = useToast();
+  // Placeholder wallet address
+  const walletAddress = `0x1A2b3C4d5E6f7G8h9I0jK1L2m3N4o5P6q7R8s9T0`;
+  
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(walletAddress);
+    toast({
+      title: "Address Copied!",
+      description: "The wallet address has been copied to your clipboard.",
+    });
+  };
 
   return (
     <div className="container py-12">
@@ -117,7 +121,7 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
               </div>
             </CardHeader>
              <CardContent>
-              <CoinChart coinId={params.id} initialData={initialChartData} />
+              <CoinChart coinId={coin.id} initialData={initialChartData} />
             </CardContent>
           </Card>
            <Card>
@@ -248,47 +252,43 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
                   <Button size="lg">Buy Now</Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Buy {coin.name} ({coin.symbol.toUpperCase()})</DialogTitle>
-                    <DialogDescription>
-                      Scan the QR code with your wallet app or choose a preset amount.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid sm:grid-cols-2 gap-6 py-4">
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                       <Image
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=bitcoin:${coin.id}?amount=0`}
+                    <DialogHeader>
+                      <DialogTitle>Buy {coin.name} ({coin.symbol.toUpperCase()})</DialogTitle>
+                      <DialogDescription>
+                        Scan the QR code with your wallet app to send payment.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col items-center justify-center space-y-4 py-4">
+                      <Image
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${walletAddress}`}
                         alt="QR Code"
-                        width={150}
-                        height={150}
-                        className="rounded-lg"
+                        width={200}
+                        height={200}
+                        className="rounded-lg border p-2"
                       />
-                      <p className="text-xs text-center text-muted-foreground">
-                        This is a placeholder QR code for demonstration purposes.
-                      </p>
+                      <div className="w-full space-y-2 pt-2">
+                        <Label htmlFor="wallet-address" className="text-left">Payment Address</Label>
+                        <div className="relative">
+                          <Input
+                            id="wallet-address"
+                            value={walletAddress}
+                            readOnly
+                            className="pr-10 text-muted-foreground font-mono text-sm"
+                          />
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                            onClick={copyToClipboard}
+                          >
+                            <Copy className="h-4 w-4" />
+                            <span className="sr-only">Copy</span>
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                     <RadioGroup defaultValue="250" className="space-y-2">
-                      {purchaseOptions.map(option => (
-                        <Label
-                          key={option.amount}
-                          htmlFor={`amount-${option.amount}`}
-                          className="flex items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                        >
-                          <div>
-                            <span className="font-bold">${option.amount}</span>
-                            <span className="text-sm text-green-600 ml-2">({option.discount} off)</span>
-                          </div>
-                          <RadioGroupItem value={String(option.amount)} id={`amount-${option.amount}`} />
-                        </Label>
-                      ))}
-                    </RadioGroup>
-                  </div>
-                   <DialogFooter>
-                    <Button type="submit" className="w-full">
-                      Confirm Purchase
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
+                  </DialogContent>
               </Dialog>
             </CardContent>
         </Card>
@@ -322,5 +322,23 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
     </div>
   );
 }
+
+
+export default async function CoinDetailsPage({ params }: { params: { id: string } }) {
+  const coin = await getCoinDetails(params.id);
+  const initialChartData = await getMarketChart(params.id, 7);
+  const news = await getNews(coin.symbol);
+  const isNewsConfigured = !!process.env.CRYPTOCOMPARE_API_KEY;
+
+  return (
+    <CoinDetailsPageContent
+      coin={coin}
+      initialChartData={initialChartData}
+      news={news}
+      isNewsConfigured={isNewsConfigured}
+    />
+  );
+}
+    
 
     
