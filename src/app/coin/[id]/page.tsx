@@ -11,6 +11,7 @@ import { CoinChart } from '@/components/coin-chart';
 import { getNews } from '@/lib/cryptocompare';
 import type { NewsArticle } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const formatCurrency = (amount?: number, currency: string = 'usd') => {
   if (typeof amount !== 'number') return 'N/A';
@@ -231,7 +232,19 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center text-center">
               <p className="mb-4 text-muted-foreground">Seamlessly add to your portfolio.</p>
-              <Button size="lg" disabled>Buy Now (Coming Soon)</Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="lg">Buy Now</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Purchasing Not Yet Available</DialogTitle>
+                    <DialogDescription>
+                      This feature is currently under development. In a real application, this would integrate with a third-party service to handle the transaction.
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             </CardContent>
         </Card>
       </div>
