@@ -1,9 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle, Gamepad2, CreditCard, Copy } from 'lucide-react';
+import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle, Gamepad2, CreditCard, Copy, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const formatCurrency = (amount?: number, currency: string = 'usd') => {
   if (typeof amount !== 'number') return 'N/A';
@@ -92,6 +94,9 @@ interface CoinDetailsProps {
 export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: CoinDetailsProps) {
   const { toast } = useToast();
   const walletAddress = `0x1A2b3C4d5E6f7G8h9I0jK1L2m3N4o5P6q7R8s9T0`;
+  const [buyStep, setBuyStep] = useState<'selectAmount' | 'showQr'>('selectAmount');
+  const [selectedAmount, setSelectedAmount] = useState<number | string>(100);
+  const [customAmount, setCustomAmount] = useState('');
   
   const copyToClipboard = () => {
     navigator.clipboard.writeText(walletAddress);
@@ -100,6 +105,27 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
       description: "The wallet address has been copied to your clipboard.",
     });
   };
+
+  const handleContinue = () => {
+    let amount = selectedAmount;
+    if (selectedAmount === 'custom') {
+      const parsedCustom = parseFloat(customAmount);
+      if (isNaN(parsedCustom) || parsedCustom <= 0) {
+        toast({ variant: 'destructive', title: 'Invalid Amount', description: 'Please enter a valid custom amount.' });
+        return;
+      }
+      amount = parsedCustom;
+    }
+    setSelectedAmount(amount);
+    setBuyStep('showQr');
+  };
+  
+  const purchaseOptions = [
+    { value: 100, label: '$100', discount: '5% bonus' },
+    { value: 250, label: '$250', discount: '7% bonus' },
+    { value: 500, label: '$500', discount: '10% bonus' },
+    { value: 750, label: '$750', discount: '12% bonus' },
+  ];
 
   return (
     <div className="container py-12">
@@ -247,20 +273,62 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center text-center">
               <p className="mb-4 text-muted-foreground">Seamlessly add to your portfolio.</p>
-              <Dialog>
+              <Dialog onOpenChange={(open) => { if (!open) setBuyStep('selectAmount'); }}>
                 <DialogTrigger asChild>
                   <Button size="lg">Buy Now</Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Buy {coin.name} ({coin.symbol.toUpperCase()})</DialogTitle>
-                      <DialogDescription>
-                        Scan the QR code with your wallet app to send payment.
-                      </DialogDescription>
-                    </DialogHeader>
+                   <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      {buyStep === 'showQr' && (
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setBuyStep('selectAmount')}>
+                          <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                      )}
+                      Buy {coin.name} ({coin.symbol.toUpperCase()})
+                    </DialogTitle>
+                    <DialogDescription>
+                      {buyStep === 'selectAmount'
+                        ? 'Select an amount to purchase.'
+                        : `Send ${formatCurrency(Number(selectedAmount))} to the address below.`}
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  {buyStep === 'selectAmount' ? (
+                     <div className="py-4 space-y-6">
+                        <RadioGroup defaultValue="100" className="grid grid-cols-2 gap-4" onValueChange={(val) => setSelectedAmount(val === 'custom' ? 'custom' : Number(val))}>
+                          {purchaseOptions.map(opt => (
+                            <Label key={opt.value} htmlFor={`amount-${opt.value}`} className="flex flex-col items-start gap-2 rounded-lg border p-3 hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary transition-colors cursor-pointer">
+                              <div className="flex items-center gap-2">
+                                <RadioGroupItem value={String(opt.value)} id={`amount-${opt.value}`} />
+                                <span className="font-bold text-lg">{opt.label}</span>
+                              </div>
+                              <span className="text-xs text-green-500 ml-6">{opt.discount}</span>
+                            </Label>
+                          ))}
+                          <Label htmlFor="amount-custom" className="flex flex-col items-start gap-2 rounded-lg border p-3 hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary transition-colors cursor-pointer col-span-2">
+                             <div className="flex items-center gap-2">
+                                <RadioGroupItem value="custom" id="amount-custom" />
+                                <span className="font-bold text-lg">Custom Amount</span>
+                              </div>
+                              {selectedAmount === 'custom' && (
+                                <Input 
+                                  type="number" 
+                                  placeholder="Enter amount" 
+                                  className="mt-2"
+                                  value={customAmount}
+                                  onChange={(e) => setCustomAmount(e.target.value)}
+                                  onClick={(e) => e.preventDefault()}
+                                />
+                              )}
+                          </Label>
+                        </RadioGroup>
+                       <Button onClick={handleContinue} className="w-full">Continue</Button>
+                      </div>
+                  ) : (
                     <div className="flex flex-col items-center justify-center space-y-4 py-4">
                       <Image
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${walletAddress}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:${walletAddress}?amount=${selectedAmount}`}
                         alt="QR Code"
                         width={200}
                         height={200}
@@ -288,7 +356,8 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                         </div>
                       </div>
                     </div>
-                  </DialogContent>
+                  )}
+                </DialogContent>
               </Dialog>
             </CardContent>
         </Card>
