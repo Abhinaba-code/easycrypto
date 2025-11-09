@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle, Gamepad2, CreditCard, Copy, ArrowLeft, Wallet } from 'lucide-react';
+import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle, Gamepad2, CreditCard, Copy, ArrowLeft, Wallet, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { getCoinDetails } from '@/lib/coingecko';
 
 const formatCurrency = (amount?: number, currency: string = 'usd') => {
   if (typeof amount !== 'number') return 'N/A';
@@ -99,6 +100,25 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
   const [selectedAmount, setSelectedAmount] = useState<number | string>(0.001);
   const [customAmount, setCustomAmount] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
+  const [btcPrice, setBtcPrice] = useState<number | null>(null);
+  const [isBtcPriceLoading, setIsBtcPriceLoading] = useState(false);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (isBuyModalOpen) {
+      setIsBtcPriceLoading(true);
+      getCoinDetails('bitcoin')
+        .then(btcDetails => {
+          setBtcPrice(btcDetails.market_data.current_price.usd);
+          setIsBtcPriceLoading(false);
+        })
+        .catch(err => {
+          console.error("Could not fetch BTC price", err);
+          setIsBtcPriceLoading(false);
+          toast({ variant: 'destructive', title: 'Error', description: 'Could not load BTC price for conversion.' });
+        });
+    }
+  }, [isBuyModalOpen, toast]);
 
   const copyToClipboard = (textToCopy: string) => {
     navigator.clipboard.writeText(textToCopy);
@@ -137,13 +157,14 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
     setBuyStep('showQr');
   };
 
-  const purchaseOptions = [
-    { value: 0.001, label: '0.001 BTC' },
-    { value: 0.0025, label: '0.0025 BTC' },
-    { value: 0.005, label: '0.005 BTC' },
-    { value: 0.0075, label: '0.0075 BTC' },
-    { value: 0.01, label: '0.01 BTC' },
-  ];
+  const btcQuantities = [0.001, 0.0025, 0.005, 0.0075, 0.01];
+
+  const purchaseOptions = btcQuantities.map(qty => ({
+    value: qty,
+    label: `${qty} BTC`,
+    price: btcPrice ? `~${formatCurrency(btcPrice * qty)}` : '',
+  }));
+
 
   return (
     <div className="container py-12">
@@ -291,7 +312,7 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center text-center">
               <p className="mb-4 text-muted-foreground">Seamlessly add to your portfolio.</p>
-              <Dialog onOpenChange={(open) => { if (!open) handleResetBuyFlow(); }}>
+              <Dialog open={isBuyModalOpen} onOpenChange={(open) => { if (!open) handleResetBuyFlow(); setIsBuyModalOpen(open); }}>
                 <DialogTrigger asChild>
                   <Button size="lg">Buy Now</Button>
                 </DialogTrigger>
@@ -314,12 +335,20 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                   
                   {buyStep === 'selectAmount' && (
                      <div className="py-4 space-y-6">
+                       {isBtcPriceLoading ? (
+                         <div className="flex justify-center items-center h-48">
+                           <Loader2 className="h-8 w-8 animate-spin" />
+                         </div>
+                       ) : (
                         <RadioGroup defaultValue="0.001" className="grid grid-cols-2 gap-4" onValueChange={(val) => setSelectedAmount(val === 'custom' ? 'custom' : Number(val))}>
                           {purchaseOptions.map(opt => (
                             <Label key={opt.value} htmlFor={`amount-${opt.value}`} className="flex flex-col items-start gap-2 rounded-lg border p-3 hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary transition-colors cursor-pointer">
                               <div className="flex items-center gap-2">
                                 <RadioGroupItem value={String(opt.value)} id={`amount-${opt.value}`} />
-                                <span className="font-bold text-lg">{opt.label}</span>
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-base">{opt.label}</span>
+                                  <span className="text-xs text-muted-foreground">{opt.price}</span>
+                                </div>
                               </div>
                             </Label>
                           ))}
@@ -340,7 +369,8 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                               )}
                           </Label>
                         </RadioGroup>
-                       <Button onClick={handleAmountContinue} className="w-full">Continue</Button>
+                       )}
+                       <Button onClick={handleAmountContinue} className="w-full" disabled={isBtcPriceLoading}>Continue</Button>
                       </div>
                   )}
 
