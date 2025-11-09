@@ -17,7 +17,6 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { getCoinDetails } from '@/lib/coingecko';
 
 const formatCurrency = (amount?: number, currency: string = 'usd') => {
   if (typeof amount !== 'number') return 'N/A';
@@ -101,14 +100,14 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
   const [customAmount, setCustomAmount] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
+  const currentPrice = coin.market_data.current_price.usd;
 
   useEffect(() => {
-    if (isBuyModalOpen && coin.market_data.current_price.usd) {
-      const defaultQty = 100 / coin.market_data.current_price.usd;
+    if (isBuyModalOpen && currentPrice) {
+      const defaultQty = 100 / currentPrice;
       setSelectedAmount(defaultQty);
     }
-  }, [isBuyModalOpen, coin.market_data.current_price.usd]);
-
+  }, [isBuyModalOpen, currentPrice]);
 
   const copyToClipboard = (textToCopy: string) => {
     navigator.clipboard.writeText(textToCopy);
@@ -120,8 +119,8 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
 
   const handleResetBuyFlow = () => {
     setBuyStep('selectAmount');
-    if (coin.market_data.current_price.usd) {
-       const defaultQty = 100 / coin.market_data.current_price.usd;
+    if (currentPrice) {
+       const defaultQty = 100 / currentPrice;
        setSelectedAmount(defaultQty);
     } else {
        setSelectedAmount(0);
@@ -130,8 +129,24 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
     setRecipientAddress('');
   };
 
+  const getBonusMultiplier = (usdValue: number): number => {
+    if (usdValue >= 1000) return 8;
+    if (usdValue >= 750) return 6;
+    if (usdValue >= 500) return 4;
+    if (usdValue >= 250) return 2;
+    if (usdValue >= 100) return 1.5;
+    return 1; // No bonus for less than $100
+  };
+
+  const calculateCustomBonus = (usdValue: number): number => {
+    if (usdValue < 100) return 1;
+    const baseBonus = 1.5;
+    const additionalSteps = Math.floor((usdValue - 100) / 250);
+    return baseBonus + (additionalSteps * 2);
+  }
+
   const handleAmountContinue = () => {
-    let amount = selectedAmount;
+    let amount = 0;
     if (selectedAmount === 'custom') {
       const parsedCustom = parseFloat(customAmount);
       if (isNaN(parsedCustom) || parsedCustom <= 0) {
@@ -139,8 +154,20 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
         return;
       }
       amount = parsedCustom;
+    } else {
+      amount = selectedAmount as number;
     }
-    setSelectedAmount(amount);
+
+    if (!amount) return;
+
+    let finalAmount = amount;
+    if (currentPrice) {
+      const usdValue = amount * currentPrice;
+      const multiplier = selectedAmount === 'custom' ? calculateCustomBonus(usdValue) : getBonusMultiplier(usdValue);
+      finalAmount = amount * multiplier;
+    }
+
+    setSelectedAmount(finalAmount);
     setBuyStep('enterAddress');
   };
 
@@ -151,18 +178,34 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
     }
     setBuyStep('showQr');
   };
-  
-  const currentPrice = coin.market_data.current_price.usd;
-  const usdQuantities = [100, 250, 500, 750, 1000];
 
+  const usdQuantities = [100, 250, 500, 750, 1000];
   const purchaseOptions = currentPrice ? usdQuantities.map(usdValue => {
     const coinQuantity = usdValue / currentPrice;
+    const multiplier = getBonusMultiplier(usdValue);
+    const bonusQuantity = coinQuantity * (multiplier - 1);
+    
     return {
       value: coinQuantity,
       label: `${coinQuantity.toFixed(4)} ${coin.symbol.toUpperCase()}`,
       price: `~${formatCurrency(usdValue)}`,
+      bonus: `+ ${bonusQuantity.toFixed(4)} Bonus`,
+      multiplier: `${multiplier}x`,
     };
   }) : [];
+  
+  let customBonusInfo = '';
+  if (selectedAmount === 'custom' && customAmount && currentPrice) {
+    const parsedCustom = parseFloat(customAmount);
+    if (!isNaN(parsedCustom) && parsedCustom > 0) {
+      const usdValue = parsedCustom * currentPrice;
+      const multiplier = calculateCustomBonus(usdValue);
+      if (multiplier > 1) {
+        const bonusQuantity = parsedCustom * (multiplier - 1);
+        customBonusInfo = `+ ${bonusQuantity.toFixed(4)} ${coin.symbol.toUpperCase()} Bonus (${multiplier}x)`;
+      }
+    }
+  }
 
 
   return (
@@ -341,11 +384,13 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                        ) : (
                         <RadioGroup defaultValue={String(purchaseOptions[0]?.value)} className="grid grid-cols-2 gap-4" onValueChange={(val) => setSelectedAmount(val === 'custom' ? 'custom' : Number(val))}>
                           {purchaseOptions.map(opt => (
-                            <Label key={opt.value} htmlFor={`amount-${opt.value}`} className="flex flex-col items-start gap-2 rounded-lg border p-3 hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary transition-colors cursor-pointer">
-                              <div className="flex items-center gap-2">
+                            <Label key={opt.value} htmlFor={`amount-${opt.value}`} className="relative flex flex-col items-start gap-1 rounded-lg border p-3 hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary transition-colors cursor-pointer">
+                               <Badge className="absolute top-2 right-2">{opt.multiplier} Bonus</Badge>
+                               <div className="flex items-center gap-2">
                                 <RadioGroupItem value={String(opt.value)} id={`amount-${opt.value}`} />
                                 <div className="flex flex-col">
                                   <span className="font-bold text-base">{opt.label}</span>
+                                  <span className="text-xs text-green-500">{opt.bonus}</span>
                                   <span className="text-xs text-muted-foreground">{opt.price}</span>
                                 </div>
                               </div>
@@ -357,14 +402,19 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                                 <span className="font-bold text-lg">Custom Amount</span>
                               </div>
                               {selectedAmount === 'custom' && (
-                                <Input 
-                                  type="number" 
-                                  placeholder={`Enter ${coin.symbol.toUpperCase()} amount`} 
-                                  className="mt-2"
-                                  value={customAmount}
-                                  onChange={(e) => setCustomAmount(e.target.value)}
-                                  onClick={(e) => e.preventDefault()}
-                                />
+                                <div className='w-full'>
+                                  <Input 
+                                    type="number" 
+                                    placeholder={`Enter ${coin.symbol.toUpperCase()} amount`} 
+                                    className="mt-2"
+                                    value={customAmount}
+                                    onChange={(e) => setCustomAmount(e.target.value)}
+                                    onClick={(e) => e.preventDefault()}
+                                  />
+                                   {customBonusInfo && (
+                                    <p className="text-xs text-green-500 mt-1">{customBonusInfo}</p>
+                                  )}
+                                </div>
                               )}
                           </Label>
                         </RadioGroup>
@@ -473,4 +523,5 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
     </div>
   );
 }
- 
+
+    
