@@ -96,7 +96,7 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
   const { toast } = useToast();
   const paymentWalletAddress = `0x1A2b3C4d5E6f7G8h9I0jK1L2m3N4o5P6q7R8s9T0`;
   const [buyStep, setBuyStep] = useState<'selectAmount' | 'enterAddress' | 'showQr'>('selectAmount');
-  const [selectedAmount, setSelectedAmount] = useState<number | string>(100);
+  const [selectedAmount, setSelectedAmount] = useState<number | string>(0.001);
   const [customAmount, setCustomAmount] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
 
@@ -110,7 +110,7 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
 
   const handleResetBuyFlow = () => {
     setBuyStep('selectAmount');
-    setSelectedAmount(100);
+    setSelectedAmount(0.001);
     setCustomAmount('');
     setRecipientAddress('');
   };
@@ -138,10 +138,11 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
   };
 
   const purchaseOptions = [
-    { value: 100, label: '$100', discount: '5% bonus' },
-    { value: 250, label: '$250', discount: '7% bonus' },
-    { value: 500, label: '$500', discount: '10% bonus' },
-    { value: 750, label: '$750', discount: '12% bonus' },
+    { value: 0.001, label: '0.001 BTC' },
+    { value: 0.0025, label: '0.0025 BTC' },
+    { value: 0.005, label: '0.005 BTC' },
+    { value: 0.0075, label: '0.0075 BTC' },
+    { value: 0.01, label: '0.01 BTC' },
   ];
 
   return (
@@ -307,20 +308,19 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                     <DialogDescription>
                       {buyStep === 'selectAmount' && 'Select an amount to purchase.'}
                       {buyStep === 'enterAddress' && 'Enter your wallet address to receive the crypto.'}
-                      {buyStep === 'showQr' && `Send ${formatCurrency(Number(selectedAmount))} to the address below.`}
+                      {buyStep === 'showQr' && `Send payment to the address below.`}
                     </DialogDescription>
                   </DialogHeader>
                   
                   {buyStep === 'selectAmount' && (
                      <div className="py-4 space-y-6">
-                        <RadioGroup defaultValue="100" className="grid grid-cols-2 gap-4" onValueChange={(val) => setSelectedAmount(val === 'custom' ? 'custom' : Number(val))}>
+                        <RadioGroup defaultValue="0.001" className="grid grid-cols-2 gap-4" onValueChange={(val) => setSelectedAmount(val === 'custom' ? 'custom' : Number(val))}>
                           {purchaseOptions.map(opt => (
                             <Label key={opt.value} htmlFor={`amount-${opt.value}`} className="flex flex-col items-start gap-2 rounded-lg border p-3 hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary transition-colors cursor-pointer">
                               <div className="flex items-center gap-2">
                                 <RadioGroupItem value={String(opt.value)} id={`amount-${opt.value}`} />
                                 <span className="font-bold text-lg">{opt.label}</span>
                               </div>
-                              <span className="text-xs text-green-500 ml-6">{opt.discount}</span>
                             </Label>
                           ))}
                           <Label htmlFor="amount-custom" className="flex flex-col items-start gap-2 rounded-lg border p-3 hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary transition-colors cursor-pointer col-span-2">
@@ -331,7 +331,7 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                               {selectedAmount === 'custom' && (
                                 <Input 
                                   type="number" 
-                                  placeholder="Enter amount" 
+                                  placeholder="Enter BTC amount" 
                                   className="mt-2"
                                   value={customAmount}
                                   onChange={(e) => setCustomAmount(e.target.value)}
