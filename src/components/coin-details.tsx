@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useState } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle, Gamepad2, CreditCard, Copy, ArrowLeft } from 'lucide-react';
+import { ExternalLink, Github, Globe, MessageCircle, Twitter, TrendingUp, TrendingDown, AlertTriangle, Gamepad2, CreditCard, Copy, ArrowLeft, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -93,20 +94,28 @@ interface CoinDetailsProps {
 
 export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: CoinDetailsProps) {
   const { toast } = useToast();
-  const walletAddress = `0x1A2b3C4d5E6f7G8h9I0jK1L2m3N4o5P6q7R8s9T0`;
-  const [buyStep, setBuyStep] = useState<'selectAmount' | 'showQr'>('selectAmount');
+  const paymentWalletAddress = `0x1A2b3C4d5E6f7G8h9I0jK1L2m3N4o5P6q7R8s9T0`;
+  const [buyStep, setBuyStep] = useState<'selectAmount' | 'enterAddress' | 'showQr'>('selectAmount');
   const [selectedAmount, setSelectedAmount] = useState<number | string>(100);
   const [customAmount, setCustomAmount] = useState('');
-  
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(walletAddress);
+  const [recipientAddress, setRecipientAddress] = useState('');
+
+  const copyToClipboard = (textToCopy: string) => {
+    navigator.clipboard.writeText(textToCopy);
     toast({
       title: "Address Copied!",
       description: "The wallet address has been copied to your clipboard.",
     });
   };
 
-  const handleContinue = () => {
+  const handleResetBuyFlow = () => {
+    setBuyStep('selectAmount');
+    setSelectedAmount(100);
+    setCustomAmount('');
+    setRecipientAddress('');
+  };
+
+  const handleAmountContinue = () => {
     let amount = selectedAmount;
     if (selectedAmount === 'custom') {
       const parsedCustom = parseFloat(customAmount);
@@ -117,9 +126,17 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
       amount = parsedCustom;
     }
     setSelectedAmount(amount);
+    setBuyStep('enterAddress');
+  };
+
+  const handleAddressContinue = () => {
+    if (recipientAddress.trim() === '') {
+      toast({ variant: 'destructive', title: 'Invalid Address', description: 'Please enter a valid wallet address.' });
+      return;
+    }
     setBuyStep('showQr');
   };
-  
+
   const purchaseOptions = [
     { value: 100, label: '$100', discount: '5% bonus' },
     { value: 250, label: '$250', discount: '7% bonus' },
@@ -273,28 +290,28 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center text-center">
               <p className="mb-4 text-muted-foreground">Seamlessly add to your portfolio.</p>
-              <Dialog onOpenChange={(open) => { if (!open) setBuyStep('selectAmount'); }}>
+              <Dialog onOpenChange={(open) => { if (!open) handleResetBuyFlow(); }}>
                 <DialogTrigger asChild>
                   <Button size="lg">Buy Now</Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                    <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                      {buyStep === 'showQr' && (
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setBuyStep('selectAmount')}>
+                      {buyStep !== 'selectAmount' && (
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setBuyStep(buyStep === 'showQr' ? 'enterAddress' : 'selectAmount')}>
                           <ArrowLeft className="h-4 w-4" />
                         </Button>
                       )}
                       Buy {coin.name} ({coin.symbol.toUpperCase()})
                     </DialogTitle>
                     <DialogDescription>
-                      {buyStep === 'selectAmount'
-                        ? 'Select an amount to purchase.'
-                        : `Send ${formatCurrency(Number(selectedAmount))} to the address below.`}
+                      {buyStep === 'selectAmount' && 'Select an amount to purchase.'}
+                      {buyStep === 'enterAddress' && 'Enter your wallet address to receive the crypto.'}
+                      {buyStep === 'showQr' && `Send ${formatCurrency(Number(selectedAmount))} to the address below.`}
                     </DialogDescription>
                   </DialogHeader>
                   
-                  {buyStep === 'selectAmount' ? (
+                  {buyStep === 'selectAmount' && (
                      <div className="py-4 space-y-6">
                         <RadioGroup defaultValue="100" className="grid grid-cols-2 gap-4" onValueChange={(val) => setSelectedAmount(val === 'custom' ? 'custom' : Number(val))}>
                           {purchaseOptions.map(opt => (
@@ -323,35 +340,71 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                               )}
                           </Label>
                         </RadioGroup>
-                       <Button onClick={handleContinue} className="w-full">Continue</Button>
+                       <Button onClick={handleAmountContinue} className="w-full">Continue</Button>
                       </div>
-                  ) : (
+                  )}
+
+                  {buyStep === 'enterAddress' && (
+                    <div className="py-4 space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="recipient-address">Recipient Wallet Address</Label>
+                        <Input
+                          id="recipient-address"
+                          placeholder="Enter your wallet address"
+                          value={recipientAddress}
+                          onChange={(e) => setRecipientAddress(e.target.value)}
+                        />
+                      </div>
+                      <Button onClick={handleAddressContinue} className="w-full">Continue</Button>
+                    </div>
+                  )}
+
+                  {buyStep === 'showQr' && (
                     <div className="flex flex-col items-center justify-center space-y-4 py-4">
                       <Image
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:${walletAddress}?amount=${selectedAmount}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:${paymentWalletAddress}?amount=${selectedAmount}`}
                         alt="QR Code"
                         width={200}
                         height={200}
                         className="rounded-lg border p-2"
                       />
-                      <div className="w-full space-y-2 pt-2">
-                        <Label htmlFor="wallet-address" className="text-left">Payment Address</Label>
+                      <div className="w-full space-y-2 pt-2 text-center">
+                        <Label>Send to this address</Label>
                         <div className="relative">
                           <Input
-                            id="wallet-address"
-                            value={walletAddress}
+                            value={paymentWalletAddress}
                             readOnly
-                            className="pr-10 text-muted-foreground font-mono text-sm"
+                            className="pr-10 text-muted-foreground font-mono text-sm text-center"
                           />
                           <Button
                             type="button"
                             size="icon"
                             variant="ghost"
                             className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                            onClick={copyToClipboard}
+                            onClick={() => copyToClipboard(paymentWalletAddress)}
                           >
                             <Copy className="h-4 w-4" />
-                            <span className="sr-only">Copy</span>
+                            <span className="sr-only">Copy Payment Address</span>
+                          </Button>
+                        </div>
+                      </div>
+                       <div className="w-full space-y-2 pt-2 text-center">
+                        <Label>Your receiving address</Label>
+                        <div className="relative">
+                           <Input
+                            value={recipientAddress}
+                            readOnly
+                            className="pr-10 text-muted-foreground font-mono text-sm text-center"
+                          />
+                           <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                            onClick={() => copyToClipboard(recipientAddress)}
+                          >
+                            <Copy className="h-4 w-4" />
+                            <span className="sr-only">Copy Recipient Address</span>
                           </Button>
                         </div>
                       </div>
