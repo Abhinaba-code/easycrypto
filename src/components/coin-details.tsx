@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -340,7 +339,7 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                            <Loader2 className="h-8 w-8 animate-spin" />
                          </div>
                        ) : (
-                        <RadioGroup defaultValue={String(purchaseOptions[0].value)} className="grid grid-cols-2 gap-4" onValueChange={(val) => setSelectedAmount(val === 'custom' ? 'custom' : Number(val))}>
+                        <RadioGroup defaultValue={String(purchaseOptions[0]?.value)} className="grid grid-cols-2 gap-4" onValueChange={(val) => setSelectedAmount(val === 'custom' ? 'custom' : Number(val))}>
                           {purchaseOptions.map(opt => (
                             <Label key={opt.value} htmlFor={`amount-${opt.value}`} className="flex flex-col items-start gap-2 rounded-lg border p-3 hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary transition-colors cursor-pointer">
                               <div className="flex items-center gap-2">
@@ -474,3 +473,4 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
     </div>
   );
 }
+ 
