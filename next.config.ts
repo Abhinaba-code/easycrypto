@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https://',
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
@@ -51,6 +51,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'icons.llamao.fi',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.qrserver.com',
         port: '',
         pathname: '/**',
       }
