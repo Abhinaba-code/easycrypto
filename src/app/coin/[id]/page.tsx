@@ -1,4 +1,5 @@
 
+
 import { getCoinDetails, getMarketChart } from '@/lib/coingecko';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -11,7 +12,9 @@ import { CoinChart } from '@/components/coin-chart';
 import { getNews } from '@/lib/cryptocompare';
 import type { NewsArticle } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const formatCurrency = (amount?: number, currency: string = 'usd') => {
   if (typeof amount !== 'number') return 'N/A';
@@ -85,6 +88,14 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
   const initialChartData = await getMarketChart(params.id, 7);
   const news = await getNews(coin.symbol);
   const isNewsConfigured = !!process.env.CRYPTOCOMPARE_API_KEY;
+
+  const purchaseOptions = [
+    { amount: 100, discount: "2%" },
+    { amount: 250, discount: "3%" },
+    { amount: 500, discount: "5%" },
+    { amount: 750, discount: "7%" },
+    { amount: 1000, discount: "10%" },
+  ];
 
   return (
     <div className="container py-12">
@@ -236,13 +247,47 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
                 <DialogTrigger asChild>
                   <Button size="lg">Buy Now</Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Purchasing Not Yet Available</DialogTitle>
+                    <DialogTitle>Buy {coin.name} ({coin.symbol.toUpperCase()})</DialogTitle>
                     <DialogDescription>
-                      This feature is currently under development. In a real application, this would integrate with a third-party service to handle the transaction.
+                      Scan the QR code with your wallet app or choose a preset amount.
                     </DialogDescription>
                   </DialogHeader>
+                  <div className="grid sm:grid-cols-2 gap-6 py-4">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                       <Image
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=bitcoin:${coin.id}?amount=0`}
+                        alt="QR Code"
+                        width={150}
+                        height={150}
+                        className="rounded-lg"
+                      />
+                      <p className="text-xs text-center text-muted-foreground">
+                        This is a placeholder QR code for demonstration purposes.
+                      </p>
+                    </div>
+                     <RadioGroup defaultValue="250" className="space-y-2">
+                      {purchaseOptions.map(option => (
+                        <Label
+                          key={option.amount}
+                          htmlFor={`amount-${option.amount}`}
+                          className="flex items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        >
+                          <div>
+                            <span className="font-bold">${option.amount}</span>
+                            <span className="text-sm text-green-600 ml-2">({option.discount} off)</span>
+                          </div>
+                          <RadioGroupItem value={String(option.amount)} id={`amount-${option.amount}`} />
+                        </Label>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                   <DialogFooter>
+                    <Button type="submit" className="w-full">
+                      Confirm Purchase
+                    </Button>
+                  </DialogFooter>
                 </DialogContent>
               </Dialog>
             </CardContent>
@@ -277,3 +322,5 @@ export default async function CoinDetailsPage({ params }: { params: { id: string
     </div>
   );
 }
+
+    
