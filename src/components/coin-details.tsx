@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -97,28 +98,18 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
   const { toast } = useToast();
   const paymentWalletAddress = `0x1A2b3C4d5E6f7G8h9I0jK1L2m3N4o5P6q7R8s9T0`;
   const [buyStep, setBuyStep] = useState<'selectAmount' | 'enterAddress' | 'showQr'>('selectAmount');
-  const [selectedAmount, setSelectedAmount] = useState<number | string>(0.001);
+  const [selectedAmount, setSelectedAmount] = useState<number | string>(0);
   const [customAmount, setCustomAmount] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
-  const [btcPrice, setBtcPrice] = useState<number | null>(null);
-  const [isBtcPriceLoading, setIsBtcPriceLoading] = useState(false);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
 
   useEffect(() => {
-    if (isBuyModalOpen) {
-      setIsBtcPriceLoading(true);
-      getCoinDetails('bitcoin')
-        .then(btcDetails => {
-          setBtcPrice(btcDetails.market_data.current_price.usd);
-          setIsBtcPriceLoading(false);
-        })
-        .catch(err => {
-          console.error("Could not fetch BTC price", err);
-          setIsBtcPriceLoading(false);
-          toast({ variant: 'destructive', title: 'Error', description: 'Could not load BTC price for conversion.' });
-        });
+    if (isBuyModalOpen && coin.market_data.current_price.usd) {
+      const defaultQty = 100 / coin.market_data.current_price.usd;
+      setSelectedAmount(defaultQty);
     }
-  }, [isBuyModalOpen, toast]);
+  }, [isBuyModalOpen, coin.market_data.current_price.usd]);
+
 
   const copyToClipboard = (textToCopy: string) => {
     navigator.clipboard.writeText(textToCopy);
@@ -130,7 +121,12 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
 
   const handleResetBuyFlow = () => {
     setBuyStep('selectAmount');
-    setSelectedAmount(0.001);
+    if (coin.market_data.current_price.usd) {
+       const defaultQty = 100 / coin.market_data.current_price.usd;
+       setSelectedAmount(defaultQty);
+    } else {
+       setSelectedAmount(0);
+    }
     setCustomAmount('');
     setRecipientAddress('');
   };
@@ -156,14 +152,18 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
     }
     setBuyStep('showQr');
   };
+  
+  const currentPrice = coin.market_data.current_price.usd;
+  const usdQuantities = [100, 250, 500, 750, 1000];
 
-  const btcQuantities = [0.001, 0.0025, 0.005, 0.0075, 0.01];
-
-  const purchaseOptions = btcQuantities.map(qty => ({
-    value: qty,
-    label: `${qty} BTC`,
-    price: btcPrice ? `~${formatCurrency(btcPrice * qty)}` : '',
-  }));
+  const purchaseOptions = currentPrice ? usdQuantities.map(usdValue => {
+    const coinQuantity = usdValue / currentPrice;
+    return {
+      value: coinQuantity,
+      label: `${coinQuantity.toFixed(4)} ${coin.symbol.toUpperCase()}`,
+      price: `~${formatCurrency(usdValue)}`,
+    };
+  }) : [];
 
 
   return (
@@ -335,12 +335,12 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                   
                   {buyStep === 'selectAmount' && (
                      <div className="py-4 space-y-6">
-                       {isBtcPriceLoading ? (
+                       {!currentPrice ? (
                          <div className="flex justify-center items-center h-48">
                            <Loader2 className="h-8 w-8 animate-spin" />
                          </div>
                        ) : (
-                        <RadioGroup defaultValue="0.001" className="grid grid-cols-2 gap-4" onValueChange={(val) => setSelectedAmount(val === 'custom' ? 'custom' : Number(val))}>
+                        <RadioGroup defaultValue={String(purchaseOptions[0].value)} className="grid grid-cols-2 gap-4" onValueChange={(val) => setSelectedAmount(val === 'custom' ? 'custom' : Number(val))}>
                           {purchaseOptions.map(opt => (
                             <Label key={opt.value} htmlFor={`amount-${opt.value}`} className="flex flex-col items-start gap-2 rounded-lg border p-3 hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary transition-colors cursor-pointer">
                               <div className="flex items-center gap-2">
@@ -360,7 +360,7 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                               {selectedAmount === 'custom' && (
                                 <Input 
                                   type="number" 
-                                  placeholder="Enter BTC amount" 
+                                  placeholder={`Enter ${coin.symbol.toUpperCase()} amount`} 
                                   className="mt-2"
                                   value={customAmount}
                                   onChange={(e) => setCustomAmount(e.target.value)}
@@ -370,7 +370,7 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                           </Label>
                         </RadioGroup>
                        )}
-                       <Button onClick={handleAmountContinue} className="w-full" disabled={isBtcPriceLoading}>Continue</Button>
+                       <Button onClick={handleAmountContinue} className="w-full" disabled={!currentPrice}>Continue</Button>
                       </div>
                   )}
 
@@ -392,7 +392,7 @@ export function CoinDetails({ coin, initialChartData, news, isNewsConfigured }: 
                   {buyStep === 'showQr' && (
                     <div className="flex flex-col items-center justify-center space-y-4 py-4">
                       <Image
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:${paymentWalletAddress}?amount=${selectedAmount}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${coin.id}:${paymentWalletAddress}?amount=${selectedAmount}`}
                         alt="QR Code"
                         width={200}
                         height={200}
