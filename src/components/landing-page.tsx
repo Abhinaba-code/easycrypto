@@ -7,26 +7,18 @@ import type { Coin } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { CryptoTable } from '@/components/crypto-table';
 import { RecommendationModal } from '@/components/recommendation-modal';
-import { ChevronLeft, ChevronRight, Gamepad2 } from 'lucide-react';
-import { getTopCoins } from '@/lib/coingecko';
+import { Gamepad2 } from 'lucide-react';
+import { getTopCoins } from '@/lib/coincap';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useSearchParams } from 'next/navigation';
 
 function LandingPageContent() {
-  const searchParams = useSearchParams();
-  const page = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
-
   const [coins, setCoins] = useState<Coin[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(page);
 
   useEffect(() => {
-    const pageNum = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
-    setCurrentPage(pageNum);
     setLoading(true);
-    
-    getTopCoins(pageNum)
+    getTopCoins()
       .then(initialCoins => {
         setCoins(initialCoins);
         setLoading(false);
@@ -35,12 +27,12 @@ function LandingPageContent() {
         console.error("Failed to fetch initial coins", err);
         setLoading(false);
       });
-  }, [searchParams]);
+  }, []);
   
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const freshCoins = await getTopCoins(currentPage);
+        const freshCoins = await getTopCoins();
         setCoins(freshCoins);
       } catch (error) {
         console.error("Failed to fetch fresh coin data", error);
@@ -48,10 +40,7 @@ function LandingPageContent() {
     }, 30000); // Refresh every 30 seconds
 
     return () => clearInterval(interval);
-  }, [currentPage]);
-
-
-  const hasNextPage = coins.length === 50;
+  }, []);
 
   return (
     <>
@@ -93,21 +82,6 @@ function LandingPageContent() {
             ) : (
               <CryptoTable coins={coins} onRecommend={setSelectedCoin} />
             )}
-            <div className="flex justify-center items-center gap-4 mt-8">
-              <Button asChild variant="outline" disabled={currentPage <= 1}>
-                <Link href={`/?page=${currentPage - 1}`}>
-                  <ChevronLeft className="mr-2 h-4 w-4" />
-                  Previous
-                </Link>
-              </Button>
-              <span className="text-muted-foreground">Page {currentPage}</span>
-              <Button asChild variant="outline" disabled={!hasNextPage}>
-                <Link href={`/?page=${currentPage + 1}`}>
-                  Next
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
         </section>
       </div>
 

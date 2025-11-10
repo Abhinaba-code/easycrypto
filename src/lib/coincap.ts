@@ -36,8 +36,8 @@ function transformCoinData(asset: CoinCapAsset): Coin {
     market_cap_rank: parseInt(asset.rank, 10),
     fully_diluted_valuation: null,
     total_volume: parseFloat(asset.volumeUsd24Hr),
-    high_24h: 0, // Not available in this endpoint
-    low_24h: 0, // Not available in this endpoint
+    high_24h: null, // Not available in this endpoint
+    low_24h: null, // Not available in this endpoint
     price_change_24h: 0, // Not available directly
     price_change_percentage_24h: parseFloat(asset.changePercent24Hr),
     market_cap_change_24h: 0, // Not available directly
@@ -64,7 +64,21 @@ function transformCoinData(asset: CoinCapAsset): Coin {
 export async function getTopCoins(): Promise<Coin[]> {
   try {
     const { data } = await fetchAPI<CoinCapAsset[]>('/assets?limit=50');
-    return data.map(transformCoinData);
+    
+    const coins = data.map(transformCoinData);
+    
+    // Fetch sparkline data separately
+    const sparklinePromises = coins.map(coin => 
+      getMarketChart(coin.id, 7).then(chartData => ({
+        ...coin,
+        sparkline_in_7d: {
+          price: chartData.prices.map(p => p[1])
+        }
+      }))
+    );
+
+    return Promise.all(sparklinePromises);
+
   } catch (error) {
     return []; // Return empty array on error to prevent crashing the page
   }
