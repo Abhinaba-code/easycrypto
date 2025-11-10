@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -57,15 +56,60 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'coming-soon';
 }
 
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
-  const [gameState, setGameState] = useState<'playing' | 'loading' | 'won' | 'lost'>('playing');
+  const [gameState, setGameState] = useState<'playing' | 'loading' | 'won' | 'lost' | 'finished'>('playing');
   const [initialPrice, setInitialPrice] = useState<number | null>(null);
   const [result, setResult] = useState<GameResult>(null);
   const router = useRouter();
   const { user } = useAuth();
+  
+  // Blackjack state
+  const [playerHand, setPlayerHand] = useState<number[]>([]);
+  const [dealerHand, setDealerHand] = useState<number[]>([]);
+  const [playerScore, setPlayerScore] = useState(0);
+  const [dealerScore, setDealerScore] = useState(0);
+
+  const calculateScore = (hand: number[]) => hand.reduce((a, b) => a + b, 0);
+
+  const startGame = useCallback(() => {
+    const newPlayerHand = [Math.floor(Math.random() * 10) + 2, Math.floor(Math.random() * 10) + 2];
+    const newDealerHand = [Math.floor(Math.random() * 10) + 2, Math.floor(Math.random() * 10) + 2];
+    setPlayerHand(newPlayerHand);
+    setDealerHand(newDealerHand);
+    setPlayerScore(calculateScore(newPlayerHand));
+    setDealerScore(calculateScore(newDealerHand));
+    setGameState('playing');
+    setResult(null);
+  }, []);
+
+  const handleHit = () => {
+    const newCard = Math.floor(Math.random() * 10) + 2;
+    const newHand = [...playerHand, newCard];
+    const newScore = calculateScore(newHand);
+    setPlayerHand(newHand);
+    setPlayerScore(newScore);
+    if (newScore > 21) {
+      setGameState('lost');
+      setResult({ title: "Bust!", variant: 'destructive', description: `You went over 21 with ${newScore}.` });
+    }
+  };
+
+  const handleStand = () => {
+    setGameState('finished');
+    if (playerScore > dealerScore || dealerScore > 21) {
+      setGameState('won');
+      setResult({ title: "You Win!", variant: 'default', description: `Your ${playerScore} beats the dealer's ${dealerScore}.` });
+    } else if (playerScore < dealerScore) {
+      setGameState('lost');
+      setResult({ title: "You Lose!", variant: 'destructive', description: `Dealer's ${dealerScore} beats your ${playerScore}.` });
+    } else {
+      setGameState('lost');
+      setResult({ title: "Push!", variant: 'destructive', description: `You both have ${playerScore}.` });
+    }
+  };
 
 
   const fetchBtcPrice = useCallback(async () => {
@@ -88,7 +132,10 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
         setGameState('playing');
       });
     }
-  }, [fetchBtcPrice, gameType]);
+    if (gameType === 'ai-blackjack') {
+      startGame();
+    }
+  }, [fetchBtcPrice, gameType, startGame]);
 
   useEffect(() => {
     if (isActive && user) {
@@ -310,6 +357,33 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </>
         );
+       case 'ai-blackjack':
+        return (
+          <div className="w-full">
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <div className="text-center">
+                <div className="mb-2">
+                  <p className="text-sm text-muted-foreground">Dealer's Hand: {gameState === 'finished' ? dealerScore : '?'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Your Hand: {playerScore}</p>
+                  <p className="text-xs">({playerHand.join(', ')})</p>
+                </div>
+              </div>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4 justify-center mt-4">
+                <Button size="lg" onClick={handleHit}>Hit</Button>
+                <Button size="lg" onClick={handleStand}>Stand</Button>
+              </div>
+            )}
+          </div>
+        );
       default:
         return null;
     }
@@ -333,7 +407,7 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
           </div>
         ) : renderGameContent()}
         
-        {(gameState === 'won' || gameState === 'lost') && user && (
+        {(gameState === 'won' || gameState === 'lost' || gameState === 'finished') && user && (
           <Button size="lg" variant="outline" onClick={resetGame}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Play Again
@@ -351,7 +425,7 @@ const games = [
     { title: "Ether Snake", icon: <SnakeIcon className="h-8 w-8 text-primary" />, description: "Grow your snake by eating ether tokens.", gameType: 'ether-snake' as const, isActive: true },
     { title: "Crypto Racers", icon: <Car className="h-8 w-8 text-primary" />, description: "Beat the other cars to the finish line to win.", gameType: 'crypto-racers' as const, isActive: true },
     { title: "Bitcoin Poker", icon: <Users className="h-8 w-8 text-primary" />, description: "A new crypto game. Click to learn more!", gameType: 'bitcoin-poker' as const, isActive: true },
-    { title: "AI Blackjack", icon: <Bot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "AI Blackjack", icon: <Bot className="h-8 w-8 text-primary" />, description: "Play against the AI dealer. Can you beat the house?", gameType: 'ai-blackjack' as const, isActive: true },
     { title: "Doge Roulette", icon: <CircleDot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Shiba Slots", icon: <Asterisk className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Futures Trading Sim", icon: <CandlestickChart className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
