@@ -61,6 +61,9 @@ interface GameCardProps {
   gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'diamond-hands' | 'nft-bingo' | 'coming-soon';
 }
 
+const slotSymbols = ['🍒', '🍋', '🍊', '🍉', '⭐', '💎'];
+const bingoSymbols = ['🐵', '🤖', '👽', '💀', '🎨'];
+
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
   const [gameState, setGameState] = useState<'playing' | 'loading' | 'won' | 'lost' | 'finished'>('playing');
   const [initialPrice, setInitialPrice] = useState<number | null>(null);
@@ -75,7 +78,6 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
   const [dealerScore, setDealerScore] = useState(0);
 
   // Slots state
-  const slotSymbols = ['🍒', '🍋', '🍊', '🍉', '⭐', '💎'];
   const [slots, setSlots] = useState(['🍒', '🍋', '🍊']);
 
   // Diamond Hands state
@@ -83,7 +85,6 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
   const [holdInterval, setHoldInterval] = useState<NodeJS.Timeout | null>(null);
 
   // NFT Bingo state
-  const bingoSymbols = ['🐵', '🤖', '👽', '💀', '🎨'];
   const [bingoCard, setBingoCard] = useState<string[][]>([[],[],[]]);
   const [drawnSymbol, setDrawnSymbol] = useState<string | null>(null);
 
@@ -165,7 +166,7 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       setBingoCard(newCard);
       setDrawnSymbol(null);
     }
-  }, [fetchBtcPrice, gameType, startGame, holdInterval, bingoSymbols]);
+  }, [fetchBtcPrice, gameType, startGame, holdInterval]);
 
   useEffect(() => {
     if (isActive && user) {
@@ -174,7 +175,7 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
      return () => {
       if (holdInterval) clearInterval(holdInterval);
     };
-  }, [resetGame, isActive, user, holdInterval]);
+  }, [resetGame, isActive, user]);
 
   const handleCryptoFlipGuess = (guess: 'up' | 'down') => {
     if (!initialPrice) return;
@@ -815,3 +816,4 @@ export default function ArcadePage() {
     
 
     
+
