@@ -1,5 +1,6 @@
 
-import { getTrendingCoins, getNews } from '@/lib/coingecko';
+import { getTrendingCoins } from '@/lib/coingecko';
+import { getNews } from '@/lib/cryptocompare';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
