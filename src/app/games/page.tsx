@@ -57,7 +57,7 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'coming-soon';
 }
 
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
@@ -246,6 +246,20 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       } else {
         setGameState('lost');
         setResult({ title: "Try Again!", variant: 'destructive', description: "No win this time." });
+      }
+    }, 1500);
+  };
+
+  const handleFuturesTradingSim = (bet: 'long' | 'short') => {
+    setGameState('loading');
+    setTimeout(() => {
+      const priceWentUp = Math.random() > 0.5;
+      if ((bet === 'long' && priceWentUp) || (bet === 'short' && !priceWentUp)) {
+        setGameState('won');
+        setResult({ title: "You Won!", variant: 'default', description: `You went ${bet} and the market moved in your favor!` });
+      } else {
+        setGameState('lost');
+        setResult({ title: "You Lost!", variant: 'destructive', description: `You went ${bet} and the market moved against you.` });
       }
     }, 1500);
   };
@@ -471,6 +485,30 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </>
         );
+      case 'futures-trading-sim':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">Long or Short?</p>
+                <p className="text-lg text-muted-foreground">
+                  Predict the market direction.
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                <Button size="lg" className="bg-green-500 hover:bg-green-600" onClick={() => handleFuturesTradingSim('long')}>Long</Button>
+                <Button size="lg" className="bg-red-500 hover:bg-red-600" onClick={() => handleFuturesTradingSim('short')}>Short</Button>
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -511,11 +549,11 @@ const games = [
     { title: "Crypto Ludo", icon: <Dice5 className="h-8 w-8 text-primary" />, description: "Roll a 6 to win the pot! A simple dice game.", gameType: 'crypto-ludo' as const, isActive: true },
     { title: "Ether Snake", icon: <SnakeIcon className="h-8 w-8 text-primary" />, description: "Grow your snake by eating ether tokens.", gameType: 'ether-snake' as const, isActive: true },
     { title: "Crypto Racers", icon: <Car className="h-8 w-8 text-primary" />, description: "Beat the other cars to the finish line to win.", gameType: 'crypto-racers' as const, isActive: true },
-    { title: "Bitcoin Poker", icon: <Users className="h-8 w-8 text-primary" />, description: "A new crypto game. Click to learn more!", gameType: 'bitcoin-poker' as const, isActive: true },
+    { title: "Bitcoin Poker", icon: <Users className="h-8 w-8 text-primary" />, description: "Get the best hand to win the pot. Test your poker face!", gameType: 'bitcoin-poker' as const, isActive: true },
     { title: "AI Blackjack", icon: <Bot className="h-8 w-8 text-primary" />, description: "Play against the AI dealer. Can you beat the house?", gameType: 'ai-blackjack' as const, isActive: true },
     { title: "Doge Roulette", icon: <CircleDot className="h-8 w-8 text-primary" />, description: "Bet on your lucky number. Will it be red or black?", gameType: 'doge-roulette' as const, isActive: true },
     { title: "Shiba Slots", icon: <Asterisk className="h-8 w-8 text-primary" />, description: "Spin the slots. Can you get a jackpot?", gameType: 'shiba-slots' as const, isActive: true },
-    { title: "Futures Trading Sim", icon: <CandlestickChart className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Futures Trading Sim", icon: <CandlestickChart className="h-8 w-8 text-primary" />, description: "Go long or short on the market. Test your trading instincts.", gameType: 'futures-trading-sim' as const, isActive: true },
     { title: "To The Moon Rocket", icon: <Rocket className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Crypto Hold'em", icon: <Hand className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Diamond Hands", icon: <Diamond className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
@@ -558,9 +596,3 @@ export default function ArcadePage() {
     </div>
   );
 }
-
-    
-
-    
-
-    
