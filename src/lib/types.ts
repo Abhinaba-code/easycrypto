@@ -128,3 +128,13 @@ export interface Nft {
   symbol: string;
   thumb: string;
 }
+
+export interface NftDetails {
+  id: string;
+  name: string;
+  symbol: string;
+  image: {
+    small: string;
+  };
+  description: string;
+}

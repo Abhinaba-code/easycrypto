@@ -1,6 +1,6 @@
 
 
-import type { Coin, CoinDetails, Exchange, MarketChart, Nft } from '@/lib/types';
+import type { Coin, CoinDetails, Exchange, MarketChart, Nft, NftDetails } from '@/lib/types';
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 
@@ -88,10 +88,14 @@ export async function getExchanges(): Promise<Exchange[]> {
   }
 }
 
-export async function getNfts(): Promise<Nft[]> {
+export async function getNfts(): Promise<NftDetails[]> {
   try {
-    return await fetchAPI<Nft[]>('/nfts/list?per_page=20&page=1');
+    const nftList = await fetchAPI<Nft[]>('/nfts/list?per_page=20&page=1');
+    const nftDetailsPromises = nftList.map(nft => fetchAPI<NftDetails>(`/nfts/${nft.id}`));
+    const nftDetails = await Promise.all(nftDetailsPromises);
+    return nftDetails;
   } catch (error) {
+    console.error("Failed to fetch NFT details", error);
     return [];
   }
 }

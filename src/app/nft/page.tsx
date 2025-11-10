@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ImageIcon, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import { NewsSection } from "@/components/news-section";
-import type { NewsArticle, Nft } from '@/lib/types';
+import type { NewsArticle, NftDetails } from '@/lib/types';
 import { getNews } from "@/lib/cryptocompare";
 import { getNfts } from "@/lib/coingecko";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -15,7 +15,7 @@ export default async function NftPage() {
   if (isNewsConfigured) {
     news = await getNews();
   }
-  const nfts: Nft[] = await getNfts();
+  const nfts: NftDetails[] = await getNfts();
 
   return (
     <>
@@ -29,9 +29,9 @@ export default async function NftPage() {
           {nfts.map((nft) => (
             <Card key={nft.id} className="overflow-hidden">
               <div className="aspect-square bg-muted flex items-center justify-center">
-                 {nft.thumb ? (
+                 {nft.image?.small ? (
                   <Image 
-                    src={nft.thumb} 
+                    src={nft.image.small} 
                     alt={nft.name}
                     width={400}
                     height={400}
