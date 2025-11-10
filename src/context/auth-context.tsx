@@ -21,16 +21,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   // This effect prevents flicker on load by waiting to render children
-  // until we know if a user is "logged in" or not (from localStorage).
+  // until we know if a user is "logged in" or not (from sessionStorage).
   useEffect(() => {
     try {
-        const storedUser = localStorage.getItem('arcade-user');
+        const storedUser = sessionStorage.getItem('arcade-user');
         if (storedUser) {
             setUser(JSON.parse(storedUser));
         }
     } catch (error) {
-        console.error("Could not parse user from localStorage", error)
-        localStorage.removeItem('arcade-user');
+        console.error("Could not parse user from sessionStorage", error)
+        sessionStorage.removeItem('arcade-user');
     }
     setLoading(false);
   }, []);
@@ -38,12 +38,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = (name: string, email: string) => {
     const userToLogin: User = { name, email };
     setUser(userToLogin);
-    localStorage.setItem('arcade-user', JSON.stringify(userToLogin));
+    sessionStorage.setItem('arcade-user', JSON.stringify(userToLogin));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('arcade-user');
+    sessionStorage.removeItem('arcade-user');
   };
 
   if (loading) {
