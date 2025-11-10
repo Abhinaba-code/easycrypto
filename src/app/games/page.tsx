@@ -33,8 +33,8 @@ const SnakeIcon = (props: React.SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <path d="M11.5 8.5c0-1.1.9-2 2-2s2 .9 2 2" />
-    <path d="M11.5 15.5c0 1.1.9 2 2-2s2-.9 2-2" />
-    <path d="M5.5 15.5c0 1.1.9 2 2-2s2-.9 2-2" />
+    <path d="M11.5 15.5c0 1.1.9 2-2s2-.9 2-2" />
+    <path d="M5.5 15.5c0 1.1.9 2-2s2-.9 2-2" />
     <path d="M12 2v2" />
     <path d="M12 10v4" />
     <path d="M12 20v2" />
@@ -57,7 +57,7 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'coming-soon';
 }
 
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
@@ -196,6 +196,25 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
   };
   
   const handleBitcoinPoker = () => {
+    setGameState('loading');
+    setTimeout(() => {
+      const hands = ["Royal Flush", "Straight Flush", "Four of a Kind", "Full House", "Flush", "Straight", "Three of a Kind", "Two Pair", "One Pair", "High Card"];
+      const yourHand = hands[Math.floor(Math.random() * hands.length)];
+      const opponentHand = hands[Math.floor(Math.random() * hands.length)];
+      const yourHandIndex = hands.indexOf(yourHand);
+      const opponentHandIndex = hands.indexOf(opponentHand);
+
+      if (yourHandIndex < opponentHandIndex) {
+        setGameState('won');
+        setResult({ title: "You Won!", variant: 'default', description: `Your ${yourHand} beats their ${opponentHand}!` });
+      } else {
+        setGameState('lost');
+        setResult({ title: "You Lost!", variant: 'destructive', description: `Their ${opponentHand} beats your ${yourHand}.` });
+      }
+    }, 1500);
+  };
+
+  const handleCryptoHoldem = () => {
     setGameState('loading');
     setTimeout(() => {
       const hands = ["Royal Flush", "Straight Flush", "Four of a Kind", "Full House", "Flush", "Straight", "Three of a Kind", "Two Pair", "One Pair", "High Card"];
@@ -428,6 +447,29 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </>
         );
+      case 'crypto-holdem':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">Texas Hold'em</p>
+                <p className="text-lg text-muted-foreground">
+                  Click 'Deal' to see who wins the hand.
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                <Button size="lg" onClick={handleCryptoHoldem}>Deal</Button>
+              </div>
+            )}
+          </>
+        );
        case 'ai-blackjack':
         return (
           <div className="w-full">
@@ -591,7 +633,7 @@ const games = [
     { title: "Shiba Slots", icon: <Asterisk className="h-8 w-8 text-primary" />, description: "Spin the slots. Can you get a jackpot?", gameType: 'shiba-slots' as const, isActive: true },
     { title: "Futures Trading Sim", icon: <CandlestickChart className="h-8 w-8 text-primary" />, description: "Go long or short on the market. Test your trading instincts.", gameType: 'futures-trading-sim' as const, isActive: true },
     { title: "To The Moon Rocket", icon: <Rocket className="h-8 w-8 text-primary" />, description: "Launch your rocket to the moon to win big!", gameType: 'to-the-moon-rocket' as const, isActive: true },
-    { title: "Crypto Hold'em", icon: <Hand className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Crypto Hold'em", icon: <Hand className="h-8 w-8 text-primary" />, description: "A classic game of Texas Hold'em with a crypto twist.", gameType: 'crypto-holdem' as const, isActive: true },
     { title: "Diamond Hands", icon: <Diamond className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "NFT Bingo", icon: <Clapperboard className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "DeFi Puzzle", icon: <Puzzle className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
@@ -632,3 +674,5 @@ export default function ArcadePage() {
     </div>
   );
 }
+
+    
