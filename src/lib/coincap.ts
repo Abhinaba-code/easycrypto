@@ -1,5 +1,6 @@
 
 import type { Coin, CoinCapAsset, MarketChart } from '@/lib/types';
+import { getTopCoins as getCoinsFromGecko } from '@/lib/coingecko';
 
 const API_BASE_URL = 'https://api.coincap.io/v2';
 
@@ -65,21 +66,32 @@ export async function getTopCoins(): Promise<Coin[]> {
   try {
     const { data } = await fetchAPI<CoinCapAsset[]>('/assets?limit=50');
     
-    const coins = data.map(transformCoinData);
+    let coins = data.map(transformCoinData);
     
-    // Fetch sparkline data separately
-    const sparklinePromises = coins.map(coin => 
-      getMarketChart(coin.id, 7).then(chartData => ({
-        ...coin,
-        sparkline_in_7d: {
-          price: chartData.prices.map(p => p[1])
-        }
-      }))
-    );
+    // Fetch sparkline data from coingecko and merge it.
+    const coinsFromGecko = await getCoinsFromGecko(1);
+    
+    const geckoMap = new Map<string, Coin>();
+    coinsFromGecko.forEach(coin => geckoMap.set(coin.symbol.toLowerCase(), coin));
 
-    return Promise.all(sparklinePromises);
+    coins = coins.map(coin => {
+        const geckoCoin = geckoMap.get(coin.symbol.toLowerCase());
+        if (geckoCoin) {
+            return {
+                ...coin,
+                id: geckoCoin.id, // Use coingecko id for navigation
+                sparkline_in_7d: geckoCoin.sparkline_in_7d,
+                high_24h: geckoCoin.high_24h,
+                low_24h: geckoCoin.low_24h,
+            };
+        }
+        return coin;
+    });
+
+    return coins;
 
   } catch (error) {
+    console.error("Failed to fetch top coins from coincap", error);
     return []; // Return empty array on error to prevent crashing the page
   }
 }
