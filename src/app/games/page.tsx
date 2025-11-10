@@ -61,7 +61,7 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'diamond-hands' | 'nft-bingo' | 'defi-puzzle' | 'chainlink-champions' | 'ripple-dice' | 'bullseye-bets' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'diamond-hands' | 'nft-bingo' | 'defi-puzzle' | 'chainlink-champions' | 'ripple-dice' | 'bullseye-bets' | 'token-tussle' | 'gas-fee-gamble' | 'coming-soon';
 }
 
 
@@ -176,7 +176,7 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
      return () => {
       if (holdInterval) clearInterval(holdInterval);
     };
-  }, [resetGame, isActive, user]);
+  }, [resetGame, isActive, user, holdInterval]);
 
   const handleCryptoFlipGuess = (guess: 'up' | 'down') => {
     if (!initialPrice) return;
@@ -427,6 +427,33 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       } else {
         setGameState('lost');
         setResult({ title: "You Missed", variant: 'destructive', description: "So close! Better luck next time." });
+      }
+    }, 1500);
+  };
+
+  const handleTokenTussle = () => {
+    setGameState('loading');
+    setTimeout(() => {
+      if (Math.random() > 0.5) {
+        setGameState('won');
+        setResult({ title: "You Won!", variant: 'default', description: "Your token was stronger! You win the tussle." });
+      } else {
+        setGameState('lost');
+        setResult({ title: "You Lost", variant: 'destructive', description: "Your opponent's token was superior. Better luck next time." });
+      }
+    }, 1500);
+  };
+
+  const handleGasFeeGamble = (bet: 'high' | 'low') => {
+    setGameState('loading');
+    setTimeout(() => {
+      const actualFee = Math.random() > 0.5 ? 'high' : 'low';
+      if (bet === actualFee) {
+        setGameState('won');
+        setResult({ title: "You Guessed Right!", variant: 'default', description: `You bet the gas fee would be ${bet}, and it was!` });
+      } else {
+        setGameState('lost');
+        setResult({ title: "You Guessed Wrong", variant: 'destructive', description: `You bet ${bet}, but the gas fee was ${actualFee}.` });
       }
     }, 1500);
   };
@@ -870,6 +897,53 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </>
         );
+      case 'token-tussle':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">Token Tussle</p>
+                <p className="text-lg text-muted-foreground">
+                  Click 'Tussle' to see which token wins.
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                <Button size="lg" onClick={handleTokenTussle}>Tussle</Button>
+              </div>
+            )}
+          </>
+        );
+      case 'gas-fee-gamble':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">High or Low Gas?</p>
+                <p className="text-lg text-muted-foreground">
+                  Predict the next gas fee spike.
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                <Button size="lg" className="bg-green-500 hover:bg-green-600" onClick={() => handleGasFeeGamble('high')}>High</Button>
+                <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600" onClick={() => handleGasFeeGamble('low')}>Low</Button>
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -923,8 +997,8 @@ const games = [
     { title: "Chainlink Champions", icon: <Swords className="h-8 w-8 text-primary" />, description: "Battle other champions. Who will be victorious?", gameType: 'chainlink-champions' as const, isActive: true },
     { title: "Ripple Dice", icon: <Dice5 className="h-8 w-8 text-primary" />, description: "Roll a 4 or higher to win!", gameType: 'ripple-dice' as const, isActive: true },
     { title: "Bullseye Bets", icon: <Target className="h-8 w-8 text-primary" />, description: "Hit the target to win a prize.", gameType: 'bullseye-bets' as const, isActive: true },
-    { title: "Token Tussle", icon: <Users className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
-    { title: "Gas Fee Gamble", icon: <Zap className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Token Tussle", icon: <Users className="h-8 w-8 text-primary" />, description: "Pit your token against another. Who will win?", gameType: 'token-tussle' as const, isActive: true },
+    { title: "Gas Fee Gamble", icon: <Zap className="h-8 w-8 text-primary" />, description: "Guess if gas fees will be high or low.", gameType: 'gas-fee-gamble' as const, isActive: true },
 ];
 
 
