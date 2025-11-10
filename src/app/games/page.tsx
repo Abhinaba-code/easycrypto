@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -56,7 +57,7 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'coming-soon';
 }
 
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
@@ -202,6 +203,22 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       } else {
         setGameState('lost');
         setResult({ title: "You Lost!", variant: 'destructive', description: `Their ${opponentHand} beats your ${yourHand}.` });
+      }
+    }, 1500);
+  };
+
+  const handleDogeRoulette = (bet: 'red' | 'black') => {
+    setGameState('loading');
+    setTimeout(() => {
+      const winningNumber = Math.floor(Math.random() * 37); // 0-36
+      const winningColor = winningNumber === 0 ? 'green' : (winningNumber % 2 === 0 ? 'black' : 'red');
+
+      if (bet === winningColor) {
+        setGameState('won');
+        setResult({ title: "You Won!", variant: 'default', description: `The ball landed on ${winningNumber} (${winningColor}). You chose ${bet}!` });
+      } else {
+        setGameState('lost');
+        setResult({ title: "You Lost!", variant: 'destructive', description: `The ball landed on ${winningNumber} (${winningColor}). You chose ${bet}.` });
       }
     }, 1500);
   };
@@ -384,6 +401,30 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </div>
         );
+      case 'doge-roulette':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">Red or Black?</p>
+                <p className="text-lg text-muted-foreground">
+                  Place your bet!
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                <Button size="lg" className="bg-red-600 hover:bg-red-700" onClick={() => handleDogeRoulette('red')}>Red</Button>
+                <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => handleDogeRoulette('black')}>Black</Button>
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -426,7 +467,7 @@ const games = [
     { title: "Crypto Racers", icon: <Car className="h-8 w-8 text-primary" />, description: "Beat the other cars to the finish line to win.", gameType: 'crypto-racers' as const, isActive: true },
     { title: "Bitcoin Poker", icon: <Users className="h-8 w-8 text-primary" />, description: "A new crypto game. Click to learn more!", gameType: 'bitcoin-poker' as const, isActive: true },
     { title: "AI Blackjack", icon: <Bot className="h-8 w-8 text-primary" />, description: "Play against the AI dealer. Can you beat the house?", gameType: 'ai-blackjack' as const, isActive: true },
-    { title: "Doge Roulette", icon: <CircleDot className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Doge Roulette", icon: <CircleDot className="h-8 w-8 text-primary" />, description: "Bet on your lucky number. Will it be red or black?", gameType: 'doge-roulette' as const, isActive: true },
     { title: "Shiba Slots", icon: <Asterisk className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Futures Trading Sim", icon: <CandlestickChart className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "To The Moon Rocket", icon: <Rocket className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
@@ -471,3 +512,5 @@ export default function ArcadePage() {
     </div>
   );
 }
+
+    
