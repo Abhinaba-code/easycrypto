@@ -4,6 +4,7 @@ import { Inter, Source_Code_Pro, Space_Grotesk } from 'next/font/google';
 import { Providers } from '@/components/providers';
 import { cn } from '@/lib/utils';
 import './globals.css';
+import { ThemeProvider } from '@/context/theme-context';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -34,9 +35,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("antialiased", inter.variable, spaceGrotesk.variable, sourceCodePro.variable)}>
-        <Providers>
-          {children}
-        </Providers>
+        <ThemeProvider>
+          <Providers>
+            {children}
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );
