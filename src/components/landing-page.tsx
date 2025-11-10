@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { CryptoTable } from '@/components/crypto-table';
 import { RecommendationModal } from '@/components/recommendation-modal';
 import { Gamepad2 } from 'lucide-react';
-import { getTopCoins } from '@/lib/coincap';
+import { getTopCoins } from '@/lib/coingecko';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function LandingPageContent() {
