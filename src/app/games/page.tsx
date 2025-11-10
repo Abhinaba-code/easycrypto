@@ -58,7 +58,7 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'diamond-hands' | 'nft-bingo' | 'defi-puzzle' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'diamond-hands' | 'nft-bingo' | 'defi-puzzle' | 'chainlink-champions' | 'coming-soon';
 }
 
 const slotSymbols = ['🍒', '🍋', '🍊', '🍉', '⭐', '💎'];
@@ -387,6 +387,21 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       }
     }, 1000);
   }
+
+  const handleChainlinkChampions = () => {
+    setGameState('loading');
+    setTimeout(() => {
+      const yourAttack = Math.floor(Math.random() * 100) + 1;
+      const opponentAttack = Math.floor(Math.random() * 100) + 1;
+      if (yourAttack > opponentAttack) {
+        setGameState('won');
+        setResult({ title: "You Won!", variant: 'default', description: `Your attack of ${yourAttack} beat the opponent's ${opponentAttack}!` });
+      } else {
+        setGameState('lost');
+        setResult({ title: "You Lost!", variant: 'destructive', description: `Your opponent's attack of ${opponentAttack} beat your ${yourAttack}.` });
+      }
+    }, 1500);
+  };
 
 
   const renderLoginPrompt = () => (
@@ -758,6 +773,29 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </div>
         );
+      case 'chainlink-champions':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">Battle!</p>
+                <p className="text-lg text-muted-foreground">
+                  Click 'Fight' to see who is stronger.
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                <Button size="lg" onClick={handleChainlinkChampions}>Fight</Button>
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -808,7 +846,7 @@ const games = [
     { title: "Diamond Hands", icon: <Diamond className="h-8 w-8 text-primary" />, description: "Hold on for dear life! How long can you last?", gameType: 'diamond-hands' as const, isActive: true },
     { title: "NFT Bingo", icon: <Clapperboard className="h-8 w-8 text-primary" />, description: "Match three NFT icons in a row to win!", gameType: 'nft-bingo' as const, isActive: true },
     { title: "DeFi Puzzle", icon: <Puzzle className="h-8 w-8 text-primary" />, description: "Solve the puzzle to unlock DeFi secrets.", gameType: 'defi-puzzle' as const, isActive: true },
-    { title: "Chainlink Champions", icon: <Swords className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Chainlink Champions", icon: <Swords className="h-8 w-8 text-primary" />, description: "Battle other champions. Who will be victorious?", gameType: 'chainlink-champions' as const, isActive: true },
     { title: "Ripple Dice", icon: <Dice5 className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Bullseye Bets", icon: <Target className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Token Tussle", icon: <Users className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
@@ -851,3 +889,6 @@ export default function ArcadePage() {
     
 
 
+
+
+    
