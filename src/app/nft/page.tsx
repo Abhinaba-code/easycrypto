@@ -28,14 +28,18 @@ export default async function NftPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {nfts.map((nft) => (
             <Card key={nft.id} className="overflow-hidden">
-              <div className="aspect-square bg-muted">
-                 <Image 
-                  src={nft.thumb} 
-                  alt={nft.name}
-                  width={400}
-                  height={400}
-                  className="w-full h-full object-cover"
-                />
+              <div className="aspect-square bg-muted flex items-center justify-center">
+                 {nft.thumb ? (
+                  <Image 
+                    src={nft.thumb} 
+                    alt={nft.name}
+                    width={400}
+                    height={400}
+                    className="w-full h-full object-cover"
+                  />
+                 ) : (
+                  <ImageIcon className="h-16 w-16 text-muted-foreground" />
+                 )}
               </div>
               <CardContent className="p-4">
                 <h3 className="font-bold text-lg truncate">{nft.name}</h3>
