@@ -11,6 +11,7 @@ import { ChevronLeft, ChevronRight, Gamepad2 } from 'lucide-react';
 import { getTopCoins } from '@/lib/coingecko';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSearchParams } from 'next/navigation';
+import { NewsSection } from '@/components/news-section';
 
 function LandingPage() {
   const searchParams = useSearchParams();
@@ -123,6 +124,14 @@ function LandingPage() {
 }
 
 
+function HomePageContent() {
+  return (
+    <>
+      <LandingPage />
+    </>
+  )
+}
+
 export default function HomeWrapper() {
   return (
     <Suspense fallback={
@@ -134,7 +143,8 @@ export default function HomeWrapper() {
         </div>
       </div>
     }>
-      <LandingPage />
+      <HomePageContent />
+      <NewsSection />
     </Suspense>
   );
 }

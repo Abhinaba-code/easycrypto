@@ -33,14 +33,16 @@ async function fetchAPI<T>(endpoint: string): Promise<CryptoCompareResponse<T>> 
   }
 }
 
-export async function getNews(coinSymbol: string): Promise<NewsArticle[]> {
+export async function getNews(coinSymbol?: string): Promise<NewsArticle[]> {
   if (!process.env.CRYPTOCOMPARE_API_KEY) {
     console.warn('CryptoCompare API key not found. Skipping news fetch.');
     return [];
   }
   
+  const endpoint = coinSymbol ? `/news/?lang=EN&categories=${coinSymbol}` : '/news/?lang=EN';
+
   try {
-    const response = await fetchAPI<{ Articles: NewsArticle[] }>(`/news/?lang=EN&categories=${coinSymbol}`);
+    const response = await fetchAPI<{ Articles: NewsArticle[] }>(endpoint);
     if (response.Type === 100) { // Success code from CryptoCompare
       return response.Data.Articles.slice(0, 4); // Return top 4 articles
     }

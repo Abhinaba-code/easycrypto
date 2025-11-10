@@ -1,6 +1,8 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageIcon } from "lucide-react";
 import Image from "next/image";
+import { NewsSection } from "@/components/news-section";
 
 const nfts = [
   {
@@ -63,32 +65,35 @@ const nfts = [
 
 export default function NftPage() {
   return (
-    <div className="container py-12">
-      <div className="flex items-center gap-4 mb-8">
-        <ImageIcon className="h-8 w-8" />
-        <h1 className="text-3xl font-headline font-bold">NFT Marketplace</h1>
+    <>
+      <div className="container py-12">
+        <div className="flex items-center gap-4 mb-8">
+          <ImageIcon className="h-8 w-8" />
+          <h1 className="text-3xl font-headline font-bold">NFT Marketplace</h1>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {nfts.map((nft) => (
+            <Card key={nft.id} className="overflow-hidden">
+              <div className="aspect-square bg-muted">
+                 <Image 
+                  src={nft.image} 
+                  alt={nft.name}
+                  width={400}
+                  height={400}
+                  className="w-full h-full object-cover"
+                  data-ai-hint={nft.hint}
+                />
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-bold text-lg">{nft.name}</h3>
+                <p className="text-sm text-muted-foreground">{nft.collection}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {nfts.map((nft) => (
-          <Card key={nft.id} className="overflow-hidden">
-            <div className="aspect-square bg-muted">
-               <Image 
-                src={nft.image} 
-                alt={nft.name}
-                width={400}
-                height={400}
-                className="w-full h-full object-cover"
-                data-ai-hint={nft.hint}
-              />
-            </div>
-            <CardContent className="p-4">
-              <h3 className="font-bold text-lg">{nft.name}</h3>
-              <p className="text-sm text-muted-foreground">{nft.collection}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+      <NewsSection />
+    </>
   );
 }
