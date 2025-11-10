@@ -53,16 +53,17 @@ type GameResult = {
   description: string;
 } | null;
 
+const slotSymbols = ['🍒', '🍋', '🍊', '🍉', '⭐', '💎'];
+const bingoSymbols = ['🐵', '🤖', '👽', '💀', '🎨'];
+
 interface GameCardProps {
   title: string;
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'diamond-hands' | 'nft-bingo' | 'defi-puzzle' | 'chainlink-champions' | 'ripple-dice' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'diamond-hands' | 'nft-bingo' | 'defi-puzzle' | 'chainlink-champions' | 'ripple-dice' | 'bullseye-bets' | 'coming-soon';
 }
 
-const slotSymbols = ['🍒', '🍋', '🍊', '🍉', '⭐', '💎'];
-const bingoSymbols = ['🐵', '🤖', '👽', '💀', '🎨'];
 
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
   const [gameState, setGameState] = useState<'playing' | 'loading' | 'won' | 'lost' | 'finished'>('playing');
@@ -413,6 +414,19 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       } else {
         setGameState('lost');
         setResult({ title: "You Lost!", variant: 'destructive', description: `Your opponent's attack of ${opponentAttack} beat your ${yourAttack}.` });
+      }
+    }, 1500);
+  };
+
+  const handleBullseyeBets = () => {
+    setGameState('loading');
+    setTimeout(() => {
+      if (Math.random() > 0.75) {
+        setGameState('won');
+        setResult({ title: "Bullseye!", variant: 'default', description: "You hit the center and won a prize!" });
+      } else {
+        setGameState('lost');
+        setResult({ title: "You Missed", variant: 'destructive', description: "So close! Better luck next time." });
       }
     }, 1500);
   };
@@ -833,6 +847,29 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </>
         );
+      case 'bullseye-bets':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">Hit the Bullseye!</p>
+                <p className="text-lg text-muted-foreground">
+                  Click 'Throw' to try your luck.
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                <Button size="lg" onClick={handleBullseyeBets}>Throw</Button>
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -885,7 +922,7 @@ const games = [
     { title: "DeFi Puzzle", icon: <Puzzle className="h-8 w-8 text-primary" />, description: "Solve the puzzle to unlock DeFi secrets.", gameType: 'defi-puzzle' as const, isActive: true },
     { title: "Chainlink Champions", icon: <Swords className="h-8 w-8 text-primary" />, description: "Battle other champions. Who will be victorious?", gameType: 'chainlink-champions' as const, isActive: true },
     { title: "Ripple Dice", icon: <Dice5 className="h-8 w-8 text-primary" />, description: "Roll a 4 or higher to win!", gameType: 'ripple-dice' as const, isActive: true },
-    { title: "Bullseye Bets", icon: <Target className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Bullseye Bets", icon: <Target className="h-8 w-8 text-primary" />, description: "Hit the target to win a prize.", gameType: 'bullseye-bets' as const, isActive: true },
     { title: "Token Tussle", icon: <Users className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Gas Fee Gamble", icon: <Zap className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
 ];
@@ -927,6 +964,8 @@ export default function ArcadePage() {
 
 
 
+
+    
 
     
 
