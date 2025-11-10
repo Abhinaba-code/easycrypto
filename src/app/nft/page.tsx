@@ -1,70 +1,13 @@
 
+
 import { Card, CardContent } from "@/components/ui/card";
 import { ImageIcon, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import { NewsSection } from "@/components/news-section";
-import type { NewsArticle } from '@/lib/types';
+import type { NewsArticle, Nft } from '@/lib/types';
 import { getNews } from "@/lib/cryptocompare";
+import { getNfts } from "@/lib/coingecko";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-const nfts = [
-  {
-    id: 1,
-    name: "CryptoPunk #7804",
-    collection: "CryptoPunks",
-    image: "https://picsum.photos/seed/101/400/400",
-    hint: "pixel art",
-  },
-  {
-    id: 2,
-    name: "Bored Ape #8817",
-    collection: "Bored Ape Yacht Club",
-    image: "https://picsum.photos/seed/102/400/400",
-    hint: "ape cartoon",
-  },
-  {
-    id: 3,
-    name: "Art Blocks #123",
-    collection: "Art Blocks Curated",
-    image: "https://picsum.photos/seed/103/400/400",
-    hint: "generative art",
-  },
-  {
-    id: 4,
-    name: "Meebit #456",
-    collection: "Meebits",
-    image: "https://picsum.photos/seed/104/400/400",
-    hint: "voxel character",
-  },
-  {
-    id: 5,
-    name: "Pudgy Penguin #789",
-    collection: "Pudgy Penguins",
-    image: "https://picsum.photos/seed/105/400/400",
-    hint: "cute penguin",
-  },
-  {
-    id: 6,
-    name: "Azuki #321",
-    collection: "Azuki",
-    image: "https://picsum.photos/seed/106/400/400",
-    hint: "anime character",
-  },
-   {
-    id: 7,
-    name: "Cool Cat #555",
-    collection: "Cool Cats",
-    image: "https://picsum.photos/seed/107/400/400",
-    hint: "blue cat",
-  },
-  {
-    id: 8,
-    name: "Doodles #888",
-    collection: "Doodles",
-    image: "https://picsum.photos/seed/108/400/400",
-    hint: "pastel drawing",
-  },
-];
 
 export default async function NftPage() {
   const isNewsConfigured = !!process.env.CRYPTOCOMPARE_API_KEY;
@@ -72,6 +15,7 @@ export default async function NftPage() {
   if (isNewsConfigured) {
     news = await getNews();
   }
+  const nfts: Nft[] = await getNfts();
 
   return (
     <>
@@ -86,17 +30,16 @@ export default async function NftPage() {
             <Card key={nft.id} className="overflow-hidden">
               <div className="aspect-square bg-muted">
                  <Image 
-                  src={nft.image} 
+                  src={nft.thumb} 
                   alt={nft.name}
                   width={400}
                   height={400}
                   className="w-full h-full object-cover"
-                  data-ai-hint={nft.hint}
                 />
               </div>
               <CardContent className="p-4">
-                <h3 className="font-bold text-lg">{nft.name}</h3>
-                <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                <h3 className="font-bold text-lg truncate">{nft.name}</h3>
+                <p className="text-sm text-muted-foreground uppercase">{nft.symbol}</p>
               </CardContent>
             </Card>
           ))}

@@ -1,4 +1,5 @@
 
+
 export interface Coin {
   id: string;
   symbol: string;
@@ -9,10 +10,10 @@ export interface Coin {
   market_cap_rank: number;
   fully_diluted_valuation: number | null;
   total_volume: number;
-  high_24h: number;
-  low_24h: number;
+  high_24h: number | null;
+  low_24h: number | null;
   price_change_24h: number;
-  price_change_percentage_24h: number;
+  price_change_percentage_24h: number | null;
   market_cap_change_24h: number;
   market_cap_change_percentage_24h: number;
   circulating_supply: number;
@@ -119,4 +120,11 @@ export interface Exchange {
   trust_score_rank: number;
   trade_volume_24h_btc: number;
   trade_volume_24h_btc_normalized: number;
+}
+
+export interface Nft {
+  id: string;
+  name: string;
+  symbol: string;
+  thumb: string;
 }
