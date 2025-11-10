@@ -58,7 +58,7 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'diamond-hands' | 'nft-bingo' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'diamond-hands' | 'nft-bingo' | 'defi-puzzle' | 'coming-soon';
 }
 
 const slotSymbols = ['🍒', '🍋', '🍊', '🍉', '⭐', '💎'];
@@ -374,6 +374,19 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       }
     }, 1000);
   };
+  
+  const handleDefiPuzzle = (isCorrect: boolean) => {
+    setGameState('loading');
+    setTimeout(() => {
+      if(isCorrect) {
+        setGameState('won');
+        setResult({ title: "Correct!", variant: 'default', description: `You solved the puzzle!` });
+      } else {
+        setGameState('lost');
+        setResult({ title: "Incorrect!", variant: 'destructive', description: "That's not the right answer. Try again." });
+      }
+    }, 1000);
+  }
 
 
   const renderLoginPrompt = () => (
@@ -725,6 +738,26 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </div>
         );
+      case 'defi-puzzle':
+        return (
+          <div className="w-full">
+            {result ? (
+               <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+               <div className="flex flex-col items-center gap-2 text-center">
+                <p className="text-sm text-muted-foreground">What does "TVL" stand for in DeFi?</p>
+                <div className="flex flex-col gap-2 w-full mt-2">
+                    <Button variant="outline" onClick={() => handleDefiPuzzle(false)}>Total Value Lent</Button>
+                    <Button variant="outline" onClick={() => handleDefiPuzzle(true)}>Total Value Locked</Button>
+                    <Button variant="outline" onClick={() => handleDefiPuzzle(false)}>Total Volume Logged</Button>
+                </div>
+               </div>
+            )}
+          </div>
+        );
       default:
         return null;
     }
@@ -774,7 +807,7 @@ const games = [
     { title: "Crypto Hold'em", icon: <Hand className="h-8 w-8 text-primary" />, description: "A classic game of Texas Hold'em with a crypto twist.", gameType: 'crypto-holdem' as const, isActive: true },
     { title: "Diamond Hands", icon: <Diamond className="h-8 w-8 text-primary" />, description: "Hold on for dear life! How long can you last?", gameType: 'diamond-hands' as const, isActive: true },
     { title: "NFT Bingo", icon: <Clapperboard className="h-8 w-8 text-primary" />, description: "Match three NFT icons in a row to win!", gameType: 'nft-bingo' as const, isActive: true },
-    { title: "DeFi Puzzle", icon: <Puzzle className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "DeFi Puzzle", icon: <Puzzle className="h-8 w-8 text-primary" />, description: "Solve the puzzle to unlock DeFi secrets.", gameType: 'defi-puzzle' as const, isActive: true },
     { title: "Chainlink Champions", icon: <Swords className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Ripple Dice", icon: <Dice5 className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Bullseye Bets", icon: <Target className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
@@ -816,4 +849,5 @@ export default function ArcadePage() {
     
 
     
+
 
