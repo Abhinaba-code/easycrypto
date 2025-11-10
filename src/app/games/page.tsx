@@ -57,7 +57,7 @@ interface GameCardProps {
   icon: React.ReactNode;
   description: string;
   isActive?: boolean;
-  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'coming-soon';
+  gameType: 'crypto-flip' | 'coin-toss' | 'crypto-ludo' | 'ether-snake' | 'crypto-racers' | 'bitcoin-poker' | 'ai-blackjack' | 'doge-roulette' | 'shiba-slots' | 'futures-trading-sim' | 'to-the-moon-rocket' | 'crypto-holdem' | 'diamond-hands' | 'coming-soon';
 }
 
 const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive = false, gameType }) => {
@@ -76,6 +76,10 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
   // Slots state
   const slotSymbols = ['🍒', '🍋', '🍊', '🍉', '⭐', '💎'];
   const [slots, setSlots] = useState(['🍒', '🍋', '🍊']);
+
+  // Diamond Hands state
+  const [holdTime, setHoldTime] = useState(0);
+  const [holdInterval, setHoldInterval] = useState<NodeJS.Timeout | null>(null);
 
   const calculateScore = (hand: number[]) => hand.reduce((a, b) => a + b, 0);
 
@@ -143,13 +147,21 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
     if (gameType === 'shiba-slots') {
       setSlots(['🍒', '🍋', '🍊']);
     }
-  }, [fetchBtcPrice, gameType, startGame]);
+     if (gameType === 'diamond-hands') {
+      setHoldTime(0);
+      if (holdInterval) clearInterval(holdInterval);
+      setHoldInterval(null);
+    }
+  }, [fetchBtcPrice, gameType, startGame, holdInterval]);
 
   useEffect(() => {
     if (isActive && user) {
       resetGame();
     }
-  }, [resetGame, isActive, user]);
+     return () => {
+      if (holdInterval) clearInterval(holdInterval);
+    };
+  }, [resetGame, isActive, user, holdInterval]);
 
   const handleCryptoFlipGuess = (guess: 'up' | 'down') => {
     if (!initialPrice) return;
@@ -295,6 +307,33 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
       }
     }, 1500);
   };
+
+   const startHolding = () => {
+    setGameState('loading'); // Using 'loading' state for 'holding'
+    setResult(null);
+    setHoldTime(0);
+    const interval = setInterval(() => {
+      setHoldTime(prev => prev + 0.1);
+    }, 100);
+    setHoldInterval(interval);
+  };
+
+  const stopHolding = () => {
+    if (holdInterval) {
+      clearInterval(holdInterval);
+      setHoldInterval(null);
+    }
+    setGameState('finished');
+    if (holdTime < 3) {
+      setGameState('lost');
+      setResult({ title: "Paper Hands!", variant: 'destructive', description: `You only held for ${holdTime.toFixed(1)} seconds. Try again!` });
+    } else {
+      const winnings = Math.floor(holdTime * 100);
+      setGameState('won');
+      setResult({ title: "Diamond Hands!", variant: 'default', description: `You held for ${holdTime.toFixed(1)} seconds and won $${winnings}!` });
+    }
+  };
+
 
   const renderLoginPrompt = () => (
     <>
@@ -587,6 +626,39 @@ const GameCard: React.FC<GameCardProps> = ({ title, icon, description, isActive 
             )}
           </>
         );
+      case 'diamond-hands':
+        return (
+          <>
+            {result ? (
+              <Alert variant={result.variant} className="text-center">
+                <AlertTitle className="text-xl font-bold">{result.title}</AlertTitle>
+                <AlertDescription>{result.description}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <p className="text-4xl font-bold">
+                  {gameState === 'loading' ? `${holdTime.toFixed(1)}s` : "Hold!"}
+                </p>
+                <p className="text-lg text-muted-foreground">
+                  Hold the button to win.
+                </p>
+              </>
+            )}
+            {gameState === 'playing' && (
+              <div className="flex gap-4">
+                 <Button 
+                  size="lg" 
+                  onMouseDown={startHolding} 
+                  onMouseUp={stopHolding}
+                  onTouchStart={startHolding}
+                  onTouchEnd={stopHolding}
+                >
+                  Hold On
+                </Button>
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -634,7 +706,7 @@ const games = [
     { title: "Futures Trading Sim", icon: <CandlestickChart className="h-8 w-8 text-primary" />, description: "Go long or short on the market. Test your trading instincts.", gameType: 'futures-trading-sim' as const, isActive: true },
     { title: "To The Moon Rocket", icon: <Rocket className="h-8 w-8 text-primary" />, description: "Launch your rocket to the moon to win big!", gameType: 'to-the-moon-rocket' as const, isActive: true },
     { title: "Crypto Hold'em", icon: <Hand className="h-8 w-8 text-primary" />, description: "A classic game of Texas Hold'em with a crypto twist.", gameType: 'crypto-holdem' as const, isActive: true },
-    { title: "Diamond Hands", icon: <Diamond className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
+    { title: "Diamond Hands", icon: <Diamond className="h-8 w-8 text-primary" />, description: "Hold on for dear life! How long can you last?", gameType: 'diamond-hands' as const, isActive: true },
     { title: "NFT Bingo", icon: <Clapperboard className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "DeFi Puzzle", icon: <Puzzle className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
     { title: "Chainlink Champions", icon: <Swords className="h-8 w-8 text-muted-foreground" />, description: "A new crypto game. Click to learn more!", gameType: 'coming-soon' as const },
@@ -674,5 +746,7 @@ export default function ArcadePage() {
     </div>
   );
 }
+
+    
 
     
