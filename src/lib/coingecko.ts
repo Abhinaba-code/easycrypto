@@ -88,14 +88,25 @@ export async function getExchanges(): Promise<Exchange[]> {
   }
 }
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export async function getNfts(): Promise<NftDetails[]> {
   try {
     const nftList = await fetchAPI<Nft[]>('/nfts/list?per_page=20&page=1');
-    const nftDetailsPromises = nftList.map(nft => fetchAPI<NftDetails>(`/nfts/${nft.id}`));
-    const nftDetails = await Promise.all(nftDetailsPromises);
+    const nftDetails: NftDetails[] = [];
+    for (const nft of nftList) {
+      try {
+        const detail = await fetchAPI<NftDetails>(`/nfts/${nft.id}`);
+        nftDetails.push(detail);
+        await delay(500); // Add a 500ms delay to avoid rate limiting
+      } catch (error) {
+        console.error(`Failed to fetch details for NFT ${nft.id}`, error);
+        // Continue to the next NFT even if one fails
+      }
+    }
     return nftDetails;
   } catch (error) {
-    console.error("Failed to fetch NFT details", error);
+    console.error("Failed to fetch NFT list", error);
     return [];
   }
 }
