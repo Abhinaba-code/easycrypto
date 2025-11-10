@@ -22,8 +22,8 @@ const sourceCodePro = Source_Code_Pro({
 
 
 export const metadata: Metadata = {
-  title: 'AstraPulse: Crypto Arcade',
-  description: 'Real-time crypto data, smart risk-tier recommendations, and a free arcade of fake-coin games.',
+  title: 'EasyCrypto: Crypto Buy & Sell',
+  description: 'Buy and sell cryptocurrencies with ease. Real-time data and a free arcade of games.',
 };
 
 export default function RootLayout({

@@ -77,7 +77,7 @@ export default function SignUpPage() {
             <UserPlus className="h-10 w-10" />
           </div>
           <CardTitle>Create an Account</CardTitle>
-          <CardDescription>Join AstraPulse to access your personalized dashboard and more.</CardDescription>
+          <CardDescription>Join EasyCrypto to access your personalized dashboard and more.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>

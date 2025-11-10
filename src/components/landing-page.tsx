@@ -49,13 +49,12 @@ function LandingPageContent() {
           <div className="mx-auto flex flex-col items-center gap-4 text-center">
             <h1 className="text-3xl font-headline font-bold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1]">
               <span className="animated-gradient bg-clip-text text-transparent">
-                AstraPulse
+                EasyCrypto
               </span>
-              : AI Crypto Insights
+              : Crypto Buy & Sell
             </h1>
             <p className="max-w-[750px] text-center text-lg text-muted-foreground sm:text-xl">
-              Real-time crypto data, smart risk-tier recommendations, and a free
-              arcade of fake-coin games.
+              Buy and sell cryptocurrencies with ease. Real-time data and a free arcade of games.
             </p>
             <div className="flex w-full items-center justify-center space-x-4 py-4 md:pb-10">
               <Button size="lg" className="rounded-full" asChild>

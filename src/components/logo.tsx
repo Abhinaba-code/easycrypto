@@ -6,7 +6,7 @@ export function Logo() {
     <Link href="/" className="flex items-center space-x-2">
       <Rocket className="h-6 w-6 text-primary" />
       <span className="font-bold font-headline text-lg text-primary-foreground">
-        AstraPulse
+        EasyCrypto
       </span>
     </Link>
   );
