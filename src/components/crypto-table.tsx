@@ -74,10 +74,10 @@ export function CryptoTable({ coins, onRecommend }: CryptoTableProps) {
                 {coin.price_change_percentage_24h != null ? `${coin.price_change_percentage_24h.toFixed(2)}%` : 'N/A'}
               </TableCell>
               <TableCell className="text-right hidden md:table-cell text-green-500">
-                ${coin.high_24h.toLocaleString()}
+                {coin.high_24h != null ? `$${coin.high_24h.toLocaleString()}`: 'N/A'}
               </TableCell>
               <TableCell className="text-right hidden md:table-cell text-red-500">
-                ${coin.low_24h.toLocaleString()}
+                {coin.low_24h != null ? `$${coin.low_24h.toLocaleString()}`: 'N/A'}
               </TableCell>
               <TableCell className="text-right hidden lg:table-cell">
                 ${coin.market_cap.toLocaleString()}
