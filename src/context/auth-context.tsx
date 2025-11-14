@@ -6,12 +6,14 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 interface User {
   name: string;
   email: string;
+  walletBalance: number;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (name: string, email: string) => void;
   logout: () => void;
+  updateWalletBalance: (amount: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,9 +38,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const login = (name: string, email: string) => {
-    const userToLogin: User = { name, email };
+    const userToLogin: User = { name, email, walletBalance: 1000 };
     setUser(userToLogin);
     sessionStorage.setItem('arcade-user', JSON.stringify(userToLogin));
+  };
+  
+  const updateWalletBalance = (amount: number) => {
+    setUser(currentUser => {
+      if (!currentUser) return null;
+      const newBalance = currentUser.walletBalance + amount;
+      const updatedUser = { ...currentUser, walletBalance: newBalance };
+      sessionStorage.setItem('arcade-user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
   };
 
   const logout = () => {
@@ -51,7 +63,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, updateWalletBalance }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Gamepad2, Coins, Wallet, Car, Users, Bot, CircleDot, Asterisk, CandlestickChart, Rocket, Hand, Diamond, Clapperboard, Puzzle, Swords, Dice5, Target, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
+import { useState } from 'react';
+import { TopUpWalletModal } from '@/components/top-up-wallet-modal';
 
 
 const SnakeIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -85,6 +87,8 @@ const games = [
 
 export default function ArcadePage() {
   const { user } = useAuth();
+  const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
+
   return (
     <div className="container py-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -93,12 +97,15 @@ export default function ArcadePage() {
           <h1 className="text-3xl font-headline font-bold">Crypto Arcade</h1>
         </div>
        {user && (
-         <Card className="w-full sm:w-auto">
+         <Card 
+            className="w-full sm:w-auto cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setIsTopUpModalOpen(true)}
+          >
             <CardHeader className="flex flex-row items-center gap-4 p-4">
               <Wallet className="h-6 w-6 text-primary" />
               <div>
                 <CardTitle className="text-sm font-medium leading-none">Virtual Wallet</CardTitle>
-                <p className="text-2xl font-bold">$1,000</p>
+                <p className="text-2xl font-bold">${user.walletBalance.toLocaleString()}</p>
               </div>
             </CardHeader>
           </Card>
@@ -109,6 +116,7 @@ export default function ArcadePage() {
             <GameCard key={game.title} {...game} />
         ))}
       </div>
+      <TopUpWalletModal isOpen={isTopUpModalOpen} onOpenChange={setIsTopUpModalOpen} />
     </div>
   );
 }
