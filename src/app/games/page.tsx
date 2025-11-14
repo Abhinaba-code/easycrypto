@@ -105,7 +105,7 @@ export default function ArcadePage() {
               <Wallet className="h-6 w-6 text-primary" />
               <div>
                 <CardTitle className="text-sm font-medium leading-none">Virtual Wallet</CardTitle>
-                <p className="text-2xl font-bold">${user.walletBalance.toLocaleString()}</p>
+                <p className="text-2xl font-bold">${typeof user.walletBalance === 'number' ? user.walletBalance.toLocaleString() : '...'}</p>
               </div>
             </CardHeader>
           </Card>
