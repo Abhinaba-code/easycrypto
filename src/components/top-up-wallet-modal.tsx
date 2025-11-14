@@ -28,7 +28,7 @@ export function TopUpWalletModal({ isOpen, onOpenChange }: TopUpWalletModalProps
   const { toast } = useToast();
   const [customAmount, setCustomAmount] = useState('');
 
-  const handleAddFunds = (amount: number) => {
+  const handleAddFunds = async (amount: number) => {
     if (amount <= 0 || isNaN(amount)) {
         toast({
             variant: 'destructive',
@@ -37,7 +37,7 @@ export function TopUpWalletModal({ isOpen, onOpenChange }: TopUpWalletModalProps
         });
         return;
     }
-    updateWalletBalance(amount);
+    await updateWalletBalance(amount);
     toast({
       title: 'Funds Added!',
       description: `$${amount.toLocaleString()} has been added to your virtual wallet.`,
